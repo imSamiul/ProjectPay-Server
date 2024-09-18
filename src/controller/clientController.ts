@@ -2,10 +2,16 @@ import { Request, Response } from "express";
 import { Client } from "../model/clientModel";
 
 export const createClient = async (req: Request, res: Response) => {
-  const { name, email, phone } = req.body;
-  const createClient = new Client({ name, email, phone });
+  console.log(req.body);
+
+  const { clientName, clientEmail, clientPhone } = req.body;
+  const createClient = new Client({
+    name: clientName,
+    email: clientEmail,
+    phone: clientPhone,
+  });
   try {
-    const user = await Client.findOne({ email });
+    const user = await Client.findOne({ email: clientEmail });
     if (user) {
       return res.status(400).send("Email already exists");
     }
