@@ -1,9 +1,9 @@
 import { Request, Response } from "express";
 import { Client } from "../model/clientModel";
 
+// POST:
+// Create a new client
 export const createClient = async (req: Request, res: Response) => {
-  console.log(req.body);
-
   const { clientName, clientEmail, clientPhone } = req.body;
   const createClient = new Client({
     name: clientName,
@@ -26,3 +26,20 @@ export const createClient = async (req: Request, res: Response) => {
     res.status(500).send({ message: errorMessage });
   }
 };
+
+// GET:
+
+// Get all clients
+export async function getClientList(req: Request, res: Response) {
+  try {
+    const clientsList = await Client.find();
+    res.status(200).send({ clientsList });
+  } catch (error) {
+    let errorMessage = "Failed to load the client list";
+    if (error instanceof Error) {
+      errorMessage = error.message;
+    }
+
+    res.status(500).send({ message: errorMessage });
+  }
+}
