@@ -1,22 +1,17 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
+import User from './userModel';
 
 const clientSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: true,
-    trim: true,
-  },
-  email: {
-    type: String,
-    required: true,
-    trim: true,
-    unique: true,
-  },
-  phone: {
-    type: String,
-    required: true,
-    trim: true,
-  },
+    // Specific fields for the client
+    projects: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Project',
+        },
+    ], // List of project IDs connected to the client
 });
-const Client = mongoose.model("Client", clientSchema);
-export { Client };
+
+// Use discriminator to extend the base schema for clients
+const Client = User.discriminator('client', clientSchema);
+
+export default Client;

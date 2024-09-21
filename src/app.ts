@@ -1,19 +1,21 @@
-import express from "express";
-import cors from "cors";
-import clientRoutes from "./routes/clientRoutes";
-import path from "path";
+import express from 'express';
+import cors from 'cors';
+import clientRoutes from './routes/clientRoutes';
+import path from 'path';
+import dotenv from 'dotenv';
+import connectDB from './db/mongoose';
 
-require("dotenv").config({
-  path: path.resolve(__dirname, "../config/dev.env"),
+dotenv.config({
+    path: path.resolve(__dirname, '../config/dev.env'),
 });
 
-require("./db/mongoose");
+connectDB();
 
 const app = express();
 const corsOptions = {
-  origin: "*",
-  credentials: true,
-  optionSuccessStatus: 200,
+    origin: '*',
+    credentials: true,
+    optionSuccessStatus: 200,
 };
 
 app.use(cors(corsOptions));
