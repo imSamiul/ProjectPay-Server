@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import User from './userModel';
+import { UserDocument } from '../interfaces/userDocumentType';
 
 const managerSchema = new mongoose.Schema({
   // Specific fields for the client
@@ -17,6 +18,9 @@ const managerSchema = new mongoose.Schema({
   ],
 });
 
-const ProjectManager = User.discriminator('project-manager', managerSchema);
+const ProjectManager = User.discriminator<UserDocument>(
+  'project-manager',
+  managerSchema
+);
 
 export default ProjectManager;

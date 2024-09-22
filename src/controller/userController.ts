@@ -41,8 +41,12 @@ export const createUser = async (req: Request, res: Response) => {
     if (!newUser) {
       return res.status(500).send('Failed to create user');
     }
-    const savedClient = await newUser.save();
-    res.status(201).send({ savedClient });
+    const token = await newUser.generateAuthToken();
+    if (!token) {
+      return res.status(500).send('Failed to generate token');
+    }
+    const savedUser = await newUser.save();
+    res.status(201).send({ user: savedUser, token });
   } catch (error) {
     let errorMessage = 'Failed to do something exceptional';
     if (error instanceof Error) {

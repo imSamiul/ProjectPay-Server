@@ -1,54 +1,85 @@
 import mongoose from 'mongoose';
 import validator from 'validator';
+import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
+import { UserDocument } from '../interfaces/userDocumentType';
 
 // Define base user schema
-const userSchema = new mongoose.Schema(
-    {
-        name: {
-            type: String,
-            required: true,
-            trim: true,
-        },
-        email: {
-            type: String,
-            required: true,
-            trim: true,
-            unique: true,
-            lowercase: true,
-        },
-        password: {
-            type: String,
-            required: true,
-            minlength: 6,
-            trim: true,
-            validate: (value: string) => {
-                if (validator.contains(value.toLowerCase(), 'password')) {
-                    throw new Error('Password cannot contain "password"');
-                }
-            },
-        },
-        tokens: [
-            {
-                token: {
-                    type: String,
-                    required: true,
-                },
-            },
-        ],
-        phone: {
-            type: String,
-            required: true,
-            trim: true,
-        },
+const userSchema = new mongoose.Schema<UserDocument>(
+  {
+    name: {
+      type: String,
+      required: true,
+      trim: true,
     },
+    email: {
+      type: String,
+      required: true,
+      trim: true,
+      unique: true,
+      lowercase: true,
+    },
+    password: {
+      type: String,
+      required: true,
+      minlength: 6,
+      trim: true,
+      validate: (value: string) => {
+        if (validator.contains(value.toLowerCase(), 'password')) {
+          throw new Error('Password cannot contain "password"');
+        }
+      },
+    },
+    tokens: [
+      {
+        token: {
+          type: String,
+          required: true,
+        },
+      },
+    ],
+    phone: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+  },
 
-    {
-        discriminatorKey: 'userType',
-        timestamps: true,
-    }
+  {
+    discriminatorKey: 'userType',
+    timestamps: true,
+  }
 );
 
+userSchema.pre('save', async function hashPassword(next) {
+  // this gives to individual user that i will save
+  if (this.isModified('password')) {
+    this.password = await bcrypt.hash(this.password, 8);
+  }
+
+  next();
+});
+userSchema.methods.generateAuthToken = async function generateAuthToken() {
+  // ... rest of your logic to generate and store the token (uncommented)
+  const secretKey = process.env.JWT_TOKEN;
+  if (!secretKey) {
+    throw new Error('Secret key is not provided');
+  }
+  const token = jwt.sign({ id: this.id.toString() }, secretKey);
+  this.tokens = this.tokens.concat({ token });
+  await this.save();
+  return token;
+};
+
+userSchema.methods.toJSON = function toJSON() {
+  const userObject = this.toObject();
+
+  delete userObject.password;
+  delete userObject.tokens;
+
+  return userObject;
+};
 // Create the base model
-const User = mongoose.model('User', userSchema);
+const User = mongoose.model<UserDocument>('User', userSchema);
 
 export default User;
