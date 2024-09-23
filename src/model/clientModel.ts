@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 import User from './userModel';
-import { UserDocument } from '../interfaces/userDocumentType';
+import { IUser, UserModel } from '../interfaces/userDocumentType';
 
 const clientSchema = new mongoose.Schema({
   // Specific fields for the client
@@ -13,6 +13,6 @@ const clientSchema = new mongoose.Schema({
 });
 
 // Use discriminator to extend the base schema for clients
-const Client = User.discriminator<UserDocument>('client', clientSchema);
+const Client = User.discriminator<IUser, UserModel>('client', clientSchema);
 
 export default Client;

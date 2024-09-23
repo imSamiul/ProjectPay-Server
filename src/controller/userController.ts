@@ -57,6 +57,26 @@ export const createUser = async (req: Request, res: Response) => {
   }
 };
 
+// Login User
+export async function loginUser(req: Request, res: Response) {
+  const { email, password } = req.body;
+  try {
+    const loginSuccessful = await User.findByCredentials(email, password);
+    if (!loginSuccessful) {
+      return res.status(400).send('Invalid email or password');
+    }
+    const token = await loginSuccessful.generateAuthToken();
+    res.status(200).send({ user: loginSuccessful, token });
+  } catch (error) {
+    let errorMessage = 'Failed to do something exceptional';
+    if (error instanceof Error) {
+      errorMessage = error.message;
+    }
+
+    res.status(500).send({ message: errorMessage });
+  }
+}
+
 // GET:
 
 // Get all clients

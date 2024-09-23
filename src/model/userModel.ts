@@ -2,10 +2,10 @@ import mongoose from 'mongoose';
 import validator from 'validator';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import { UserDocument } from '../interfaces/userDocumentType';
+import { IUser, IUserMethods, UserModel } from '../interfaces/userDocumentType';
 
 // Define base user schema
-const userSchema = new mongoose.Schema<UserDocument>(
+const userSchema = new mongoose.Schema<IUser, UserModel, IUserMethods>(
   {
     name: {
       type: String,
@@ -72,14 +72,32 @@ userSchema.methods.generateAuthToken = async function generateAuthToken() {
 };
 
 userSchema.methods.toJSON = function toJSON() {
-  const userObject = this.toObject();
+  const userObject: Partial<IUser> = this.toObject();
 
   delete userObject.password;
   delete userObject.tokens;
 
   return userObject;
 };
+
+// Static method to find user by credentials
+userSchema.statics.findByCredentials = async function (
+  email: string,
+  password: string
+) {
+  const user = await this.findOne({ email });
+  if (!user) {
+    throw new Error('Email or password is incorrect');
+  }
+  const isMatch = await bcrypt.compare(password, user.password);
+  if (!isMatch) {
+    throw new Error('Email or password is incorrect');
+  }
+
+  return user;
+};
+
 // Create the base model
-const User = mongoose.model<UserDocument>('User', userSchema);
+const User = mongoose.model<IUser, UserModel>('User', userSchema);
 
 export default User;
