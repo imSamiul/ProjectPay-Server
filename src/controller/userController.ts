@@ -76,6 +76,23 @@ export async function loginUser(req: Request, res: Response) {
     res.status(500).send({ message: errorMessage });
   }
 }
+// Logout User
+export async function logOutUser(req: Request, res: Response) {
+  try {
+    req.user!.tokens = req.user!.tokens.filter((token) => {
+      return token.token !== req.token;
+    });
+    await req.user!.save();
+    res.status(200).send('Logged out successfully');
+  } catch (error) {
+    let errorMessage = 'Failed to do something exceptional';
+    if (error instanceof Error) {
+      errorMessage = error.message;
+    }
+
+    res.status(500).send({ message: errorMessage });
+  }
+}
 
 // GET:
 
