@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import clientRoutes from './routes/userRoutes';
+import projectRoutes from './routes/projectRoutes';
 import path from 'path';
 import dotenv from 'dotenv';
 import connectDB from './db/mongoose';
@@ -22,5 +23,6 @@ app.use(cors(corsOptions));
 
 app.use(express.json());
 app.use(clientRoutes);
+app.use(projectRoutes);
 
 export default app;
