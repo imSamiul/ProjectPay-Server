@@ -8,7 +8,14 @@ type JwtPayload = {
 
 const auth = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const token = req.header('Authorization')?.replace('Bearer ', '');
+    const authHeader = req.header('Authorization');
+
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      throw new Error('Authentication token is missing or invalid');
+    }
+
+    const token = authHeader.replace('Bearer ', '').trim();
+
     if (!token) {
       throw new Error('Authentication token is missing');
     }
@@ -27,7 +34,13 @@ const auth = async (req: Request, res: Response, next: NextFunction) => {
     req.user = user;
     next();
   } catch (error) {
-    res.status(401).send({ message: 'Please authenticate', error });
+    if (error instanceof Error) {
+      console.log(error.message); // Log the error message
+      res.status(401).send({ error: error.message });
+    } else {
+      console.log('An unexpected error occurred', error);
+      res.status(401).send({ error: 'Not authorized to access this resource' });
+    }
   }
 };
 export default auth;

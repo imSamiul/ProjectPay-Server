@@ -66,7 +66,7 @@ export async function loginUser(req: Request, res: Response) {
       return res.status(400).send('Invalid email or password');
     }
     const token = await loginSuccessful.generateAuthToken();
-    res.status(200).send({ user: loginSuccessful, token });
+    res.status(201).send({ user: loginSuccessful, token });
   } catch (error) {
     let errorMessage = 'Failed to do something exceptional';
     if (error instanceof Error) {
@@ -79,6 +79,13 @@ export async function loginUser(req: Request, res: Response) {
 // Logout User
 export async function logOutUser(req: Request, res: Response) {
   try {
+    const checkIfTokenExists = req.user!.tokens.find((token) => {
+      return token.token === req.token;
+    });
+    if (!checkIfTokenExists) {
+      throw new Error('Token does not exist');
+    }
+
     req.user!.tokens = req.user!.tokens.filter((token) => {
       return token.token !== req.token;
     });
@@ -101,6 +108,19 @@ export async function getClientList(req: Request, res: Response) {
   try {
     const clientsList = await Client.find();
     res.status(200).send({ clientsList });
+  } catch (error) {
+    let errorMessage = 'Failed to load the client list';
+    if (error instanceof Error) {
+      errorMessage = error.message;
+    }
+
+    res.status(500).send({ message: errorMessage });
+  }
+}
+// Get the user details
+export async function getUserDetails(req: Request, res: Response) {
+  try {
+    res.status(200).send({ user: req.user });
   } catch (error) {
     let errorMessage = 'Failed to load the client list';
     if (error instanceof Error) {
