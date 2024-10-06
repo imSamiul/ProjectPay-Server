@@ -5,6 +5,6 @@ const router = express.Router();
 
 // POST:
 // create a new project
-router.post('/project/create', auth, createNewProject);
+router.post('/projects/create', auth, createNewProject);
 
 export default router;
