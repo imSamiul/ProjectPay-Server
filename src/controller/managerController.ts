@@ -12,7 +12,6 @@ export async function getManagerProjects(req: Request, res: Response) {
     if (error instanceof Error) {
       errorMessage = error.message;
     }
-
     res.status(500).send({ message: errorMessage });
   }
 }
