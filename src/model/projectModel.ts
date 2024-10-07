@@ -80,6 +80,7 @@ const projectSchema = new mongoose.Schema<ProjectType>(
     projectManager: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
+      required: true,
     },
   },
   {

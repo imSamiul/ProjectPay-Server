@@ -5,7 +5,7 @@ import { IUser, UserModel } from '../interfaces/userDocumentType';
 const managerSchema = new mongoose.Schema(
   {
     // Specific fields for the client
-    mProjects: [
+    myProjects: [
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Project',
