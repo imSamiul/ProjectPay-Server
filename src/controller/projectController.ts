@@ -2,6 +2,8 @@ import { Request, Response } from 'express';
 import Project from '../model/projectModel';
 import ProjectManager from '../model/managerModel';
 
+//GET:
+
 //POST:
 // create a new project
 export async function createNewProject(req: Request, res: Response) {
@@ -57,19 +59,3 @@ export async function createNewProject(req: Request, res: Response) {
     res.status(500).send({ message: errorMessage });
   }
 }
-
-//GET:
-// get all projects
-// export async function getAllProjects(req: Request, res: Response) {
-//   try {
-//     const projects = await Project.find();
-//     res.status(200).send(projects);
-//   } catch (error) {
-//     let errorMessage = 'Failed to do something exceptional';
-//     if (error instanceof Error) {
-//       errorMessage = error.message;
-//     }
-
-//     res.status(500).send({ message: errorMessage });
-//   }
-// }
