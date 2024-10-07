@@ -14,4 +14,5 @@ export type ProjectType = Document & {
   description: string;
   status: boolean;
   verifiedClientList: Types.ObjectId[];
+  projectManager: Types.ObjectId;
 };
