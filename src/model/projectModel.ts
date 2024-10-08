@@ -3,6 +3,11 @@ import { ProjectType } from '../types/projectDocumentType';
 
 const projectSchema = new mongoose.Schema<ProjectType>(
   {
+    projectId: {
+      type: String,
+      required: true,
+      unique: true,
+    },
     name: {
       type: String,
       required: true,
@@ -54,23 +59,37 @@ const projectSchema = new mongoose.Schema<ProjectType>(
       type: String,
       required: true,
     },
+    clientAddress: {
+      type: String,
+    },
+    clientDetails: {
+      type: String,
+    },
     startDate: {
       type: String,
       required: true,
       default: new Date().toISOString().split('T')[0],
     },
+
     endDate: {
       type: String,
       required: true,
+    },
+    demoLink: {
+      type: String,
+    },
+    typeOfWeb: {
+      type: String,
+    },
+    description: {
+      type: String,
     },
     status: {
       type: Boolean,
       required: true,
       default: false,
     },
-    description: {
-      type: String,
-    },
+
     verifiedClientList: [
       {
         type: mongoose.Schema.Types.ObjectId,

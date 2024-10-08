@@ -1,5 +1,6 @@
 import { Document, Types } from 'mongoose';
 export type ProjectType = Document & {
+  projectId: string;
   name: string;
   budget: number;
   advance: number;
@@ -7,10 +8,12 @@ export type ProjectType = Document & {
   client: string;
   clientPhone: string;
   clientEmail: string;
-
+  clientAddress: string;
+  clientDetails: string;
   startDate: string;
   endDate: string;
-
+  demoLink: string;
+  typeOfWeb: string;
   description: string;
   status: boolean;
   verifiedClientList: Types.ObjectId[];

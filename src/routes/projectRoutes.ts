@@ -1,9 +1,13 @@
 import express from 'express';
-import { createNewProject } from '../controller/projectController';
+import {
+  createNewProject,
+  searchProject,
+} from '../controller/projectController';
 import auth from '../middleware/auth';
 const router = express.Router();
 
 // GET:
+router.get('/projects/search', auth, searchProject);
 
 // POST:
 // create a new project
