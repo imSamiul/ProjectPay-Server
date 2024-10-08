@@ -1,23 +1,33 @@
 import fs from 'fs';
+// Function to generate a random number within a range
+const getRandomNumber = (min: number, max: number) => {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+};
 
-// Generate projects with fixed 10-digit client phone numbers
-const projects = Array.from({ length: 200 }, (_, i) => {
-  // Ensure the phone number is always 10 digits long
-  const phoneNumber = (9876540000 + i).toString().slice(-10); // This ensures only the last 10 digits are used
-  return {
-    name: `Project ${String.fromCharCode(68 + i)}`, // Start from Project D
-    budget: 3000 + i * 500,
-    advance: 1000 + i * 250,
-    due: 2000 + i * 250,
-    client: `clientId${i + 1}`,
-    clientPhone: phoneNumber, // Generates fixed 10-digit phone numbers
-    clientEmail: `client${i + 1}@example.com`,
-    startDate: '2024-04-01',
-    endDate: '2024-12-01',
-    status: i % 2 === 0, // Alternate status
-    description: `Project description ${i + 1}`,
-  };
-});
+// Function to generate the projects
+const generateProjects = (count: number) => {
+  return Array.from({ length: count }, (_, i) => {
+    return {
+      name: `Project ${String.fromCharCode(67 + i)}`, // Start from Project C
+      budget: getRandomNumber(5000, 20000),
+      advance: getRandomNumber(1000, 10000),
+      client: `clientId${i + 1}`,
+      clientPhone: `98765400${i % 10}`, // Ensuring 10 digits
+      clientEmail: `client${i + 1}@example.com`,
+      clientAddress: `${getRandomNumber(1, 999)} Street, City`,
+      clientDetails: `Details for client ${i + 1}`,
+      startDate: '2024-03-01',
+      endDate: '2024-12-31',
+      demoLink: `http://example.com/demo${i + 1}`,
+      typeOfWeb: 'Blog',
+      description: `Blog project description for Project ${i + 1}`,
+      status: i % 2 === 0, // Alternate status
+    };
+  });
+};
+
+// Generate 200 projects
+const projects = generateProjects(200);
 
 // Save to a JSON file
 fs.writeFile('projects.json', JSON.stringify(projects, null, 4), (err) => {

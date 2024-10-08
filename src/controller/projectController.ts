@@ -50,28 +50,44 @@ export async function createNewProject(req: Request, res: Response) {
       name,
       budget,
       advance,
-      due,
+
       client,
       clientPhone,
       clientEmail,
+      clientAddress,
+      clientDetails,
+
       startDate,
       endDate,
+      demoLink,
+      typeOfWeb,
       description,
       status,
     } = req.body;
-    const projectId = generateUUID();
+
+    let projectId;
+    let existingProjectId;
+
+    do {
+      projectId = generateUUID(); // Generate new UUID
+      existingProjectId = await Project.findOne({ projectId });
+    } while (existingProjectId);
 
     const newProject = new Project({
       projectId,
       name,
       budget,
       advance,
-      due,
+      due: budget - advance,
       client,
       clientPhone,
       clientEmail,
+      clientAddress,
+      clientDetails,
       startDate,
       endDate,
+      demoLink,
+      typeOfWeb,
       description,
       status,
       projectManager: req.user?._id,
