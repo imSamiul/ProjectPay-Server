@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import Project from '../model/projectModel';
 import ProjectManager from '../model/managerModel';
 import { generateUUID } from '../utils/uuidGenerator';
+import Fuse from 'fuse.js';
 //GET:
 // search for specific project for manager
 export async function searchProject(req: Request, res: Response) {
@@ -12,28 +13,27 @@ export async function searchProject(req: Request, res: Response) {
   }
 
   try {
-    // Split search query into words and create regex for each
-    const searchTerms = searchQuery.trim().split(/\s+/);
-    const regexArray = searchTerms.map((term) => ({
-      $or: [
-        { name: { $regex: new RegExp(term, 'i') } }, // Partial match in 'name'
-        { client: { $regex: new RegExp(term, 'i') } }, // Partial match in 'client'
-      ], // 'i' makes it case-insensitive
-    }));
-
-    console.log(searchTerms);
-    console.log(regexArray);
     const projectManagerId = req.user?._id;
-
-    // Use $and to ensure all search terms are matched
     const projects = await Project.find({
-      projectManager: projectManagerId,
-      $and: regexArray,
+      projectManager: projectManagerId, // Ensure this is filtering by manager
     });
+    const options = {
+      includeScore: true,
+      keys: ['name', 'projectId'],
+      threshold: 0.3,
+    };
 
-    res.json(projects);
+    const fuse = new Fuse(projects, options);
+
+    const result = fuse.search(searchQuery);
+    const matchedProjects = result.map((res) => res.item);
+    if (matchedProjects.length === 0) {
+      return res.status(404).json({ message: 'No project found' });
+    }
+
+    res.status(200).json(matchedProjects);
   } catch (error) {
-    let errorMessage = 'Failed to search projects';
+    let errorMessage = 'Failed to fetch projects';
     if (error instanceof Error) {
       errorMessage = error.message;
     }
