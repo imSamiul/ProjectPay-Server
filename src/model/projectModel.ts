@@ -3,7 +3,7 @@ import { ProjectType } from '../types/projectDocumentType';
 
 const projectSchema = new mongoose.Schema<ProjectType>(
   {
-    projectId: {
+    projectCode: {
       type: String,
       required: true,
       unique: true,

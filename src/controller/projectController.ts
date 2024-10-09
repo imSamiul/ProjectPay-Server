@@ -19,7 +19,7 @@ export async function searchProject(req: Request, res: Response) {
     });
     const options = {
       includeScore: true,
-      keys: ['name', 'projectId'],
+      keys: ['name', 'projectCode'],
       threshold: 0.3,
     };
 
@@ -62,16 +62,16 @@ export async function createNewProject(req: Request, res: Response) {
       status,
     } = req.body;
 
-    let projectId;
-    let existingProjectId;
+    let projectCode;
+    let existingProjectCode;
 
     do {
-      projectId = generateUUID(); // Generate new UUID
-      existingProjectId = await Project.findOne({ projectId });
-    } while (existingProjectId);
+      projectCode = generateUUID(); // Generate new UUID
+      existingProjectCode = await Project.findOne({ projectCode });
+    } while (existingProjectCode);
 
     const newProject = new Project({
-      projectId,
+      projectCode,
       name,
       budget,
       advance,

@@ -1,6 +1,6 @@
 import { Document, Types } from 'mongoose';
 export type ProjectType = Document & {
-  projectId: string;
+  projectCode: string;
   name: string;
   budget: number;
   advance: number;
