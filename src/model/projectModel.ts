@@ -36,7 +36,7 @@ const projectSchema = new mongoose.Schema<ProjectType>(
     },
     due: {
       type: Number,
-      required: true,
+
       validate: {
         validator: function (value: number) {
           return value >= 0 && value <= this.budget;
@@ -106,6 +106,11 @@ const projectSchema = new mongoose.Schema<ProjectType>(
     timestamps: true,
   }
 );
+
+projectSchema.pre('save', function (next) {
+  this.due = this.budget - this.advance;
+  next();
+});
 
 const Project = mongoose.model<ProjectType>('Project', projectSchema);
 

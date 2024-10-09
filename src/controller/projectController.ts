@@ -27,9 +27,6 @@ export async function searchProject(req: Request, res: Response) {
 
     const result = fuse.search(searchQuery);
     const matchedProjects = result.map((res) => res.item);
-    if (matchedProjects.length === 0) {
-      return res.status(404).json({ message: 'No project found' });
-    }
 
     res.status(200).json(matchedProjects);
   } catch (error) {
@@ -78,7 +75,6 @@ export async function createNewProject(req: Request, res: Response) {
       name,
       budget,
       advance,
-      due: budget - advance,
       client,
       clientPhone,
       clientEmail,
