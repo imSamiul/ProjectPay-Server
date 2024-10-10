@@ -3,6 +3,8 @@ import Project from '../model/projectModel';
 import ProjectManager from '../model/managerModel';
 import { generateUUID } from '../utils/uuidGenerator';
 import Fuse from 'fuse.js';
+import User from '../model/userModel';
+
 //GET:
 // search for specific project for manager
 export async function searchProject(req: Request, res: Response) {
@@ -95,12 +97,23 @@ export async function createNewProject(req: Request, res: Response) {
     }
 
     const savedProject = await newProject.save();
+    console.log(req.user?._id);
+
     if (savedProject) {
-      await ProjectManager.updateOne(
-        { _id: req.user?._id },
-        { $push: { myProjects: savedProject._id } }
+      const updatedProject = await ProjectManager.findOneAndUpdate(
+        {
+          _id: req.user?._id,
+          userType: 'projectManager', // Ensure you're querying the discriminator for ProjectManager
+        },
+        {
+          $push: { managerProjects: savedProject._id },
+        }
+        // Return the updated document, and create it if it doesn't exist
       );
+
+      console.log(updatedProject);
     }
+
     res.status(201).send(savedProject);
   } catch (error) {
     let errorMessage = 'Failed to do something exceptional';

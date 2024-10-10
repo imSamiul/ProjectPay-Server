@@ -2,7 +2,11 @@ import mongoose from 'mongoose';
 import validator from 'validator';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import { IUser, IUserMethods, UserModel } from '../interfaces/userDocumentType';
+import {
+  IUser,
+  IUserMethods,
+  UserModel,
+} from '../interfaces/userDocumentInterface';
 
 // Define base user schema
 const userSchema = new mongoose.Schema<IUser, UserModel, IUserMethods>(

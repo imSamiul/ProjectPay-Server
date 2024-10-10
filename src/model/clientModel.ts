@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 import User from './userModel';
-import { IUser, UserModel } from '../interfaces/userDocumentType';
+import { IUser, UserModel } from '../interfaces/userDocumentInterface';
 
 const clientSchema = new mongoose.Schema(
   {
