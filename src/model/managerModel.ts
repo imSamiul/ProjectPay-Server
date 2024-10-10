@@ -1,9 +1,8 @@
 import mongoose from 'mongoose';
 import User from './userModel';
+import { IManager, ManagerModel } from '../interfaces/managerInterface';
 
-import { IUser, UserModel } from '../interfaces/userDocumentInterface';
-
-const managerSchema = new mongoose.Schema(
+const managerSchema = new mongoose.Schema<IManager>(
   {
     managerProjects: [
       {
@@ -17,6 +16,10 @@ const managerSchema = new mongoose.Schema(
         ref: 'Client',
       },
     ],
+    age: {
+      type: Number,
+      required: true,
+    },
   },
   {
     timestamps: true,
@@ -24,8 +27,8 @@ const managerSchema = new mongoose.Schema(
 );
 
 // Update: Pass UserModel instead of IUser
-const ProjectManager = User.discriminator<IUser, UserModel>(
-  'project-manager',
+const ProjectManager = User.discriminator<IManager, ManagerModel>(
+  'projectManager',
   managerSchema
 );
 

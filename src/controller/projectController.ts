@@ -3,7 +3,6 @@ import Project from '../model/projectModel';
 import ProjectManager from '../model/managerModel';
 import { generateUUID } from '../utils/uuidGenerator';
 import Fuse from 'fuse.js';
-import User from '../model/userModel';
 
 //GET:
 // search for specific project for manager

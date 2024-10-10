@@ -1,4 +1,4 @@
-import { Document, Model, HydratedDocument } from 'mongoose';
+import { Document, Model } from 'mongoose';
 
 // I=== Interface
 export interface IUser extends Document {
