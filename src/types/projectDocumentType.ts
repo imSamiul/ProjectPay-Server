@@ -18,4 +18,5 @@ export type ProjectType = Document & {
   status: boolean;
   verifiedClientList: Types.ObjectId[];
   projectManager: Types.ObjectId;
+  paymentList: Types.ObjectId[];
 };

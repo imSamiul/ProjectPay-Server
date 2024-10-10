@@ -101,6 +101,12 @@ const projectSchema = new mongoose.Schema<ProjectType>(
       ref: 'User',
       required: true,
     },
+    paymentList: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Payment',
+      },
+    ],
   },
   {
     timestamps: true,
