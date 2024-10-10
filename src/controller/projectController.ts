@@ -5,7 +5,7 @@ import { generateUUID } from '../utils/uuidGenerator';
 import Fuse from 'fuse.js';
 
 //GET:
-// search for specific project for manager
+// search project for manager
 export async function searchProject(req: Request, res: Response) {
   const searchQuery = req.query.q;
 
@@ -40,6 +40,22 @@ export async function searchProject(req: Request, res: Response) {
   }
 }
 
+// get the project details
+export async function getProjectDetails(req: Request, res: Response) {
+  try {
+    const projectCode = req.params.projectCode;
+    const project = await Project.findOne({ projectCode });
+    res.status(200).send(project);
+  } catch (error) {
+    let errorMessage = 'Failed to fetch project details';
+    if (error instanceof Error) {
+      errorMessage = error.message;
+    }
+
+    res.status(500).send({ message: errorMessage });
+  }
+}
+
 //POST:
 // create a new project
 export async function createNewProject(req: Request, res: Response) {
@@ -48,13 +64,11 @@ export async function createNewProject(req: Request, res: Response) {
       name,
       budget,
       advance,
-
       client,
       clientPhone,
       clientEmail,
       clientAddress,
       clientDetails,
-
       startDate,
       endDate,
       demoLink,
