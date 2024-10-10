@@ -24,7 +24,7 @@ const managerSchema = new mongoose.Schema<ManagerType>(
 
 // Update: Pass UserModel instead of IUser
 const ProjectManager = User.discriminator<ManagerType, ManagerModelType>(
-  'project-manager',
+  'projectManager',
   managerSchema
 );
 

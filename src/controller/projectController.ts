@@ -96,21 +96,18 @@ export async function createNewProject(req: Request, res: Response) {
     }
 
     const savedProject = await newProject.save();
-    console.log(req.user?._id);
 
     if (savedProject) {
-      const updatedProject = await ProjectManager.findOneAndUpdate(
+      await ProjectManager.findOneAndUpdate(
         {
           _id: req.user?._id,
-          userType: 'project-manager', // Ensure you're querying the discriminator for ProjectManager
+          userType: 'projectManager', // Ensure you're querying the discriminator for ProjectManager
         },
         {
           $push: { managerProjects: savedProject._id },
         }
         // Return the updated document, and create it if it doesn't exist
       );
-
-      console.log(updatedProject);
     }
 
     res.status(201).send(savedProject);
