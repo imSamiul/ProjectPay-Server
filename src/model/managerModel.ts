@@ -16,10 +16,6 @@ const managerSchema = new mongoose.Schema<ManagerType>(
         ref: 'Client',
       },
     ],
-    age: {
-      type: Number,
-      required: true,
-    },
   },
   {
     timestamps: true,
@@ -28,7 +24,7 @@ const managerSchema = new mongoose.Schema<ManagerType>(
 
 // Update: Pass UserModel instead of IUser
 const ProjectManager = User.discriminator<ManagerType, ManagerModelType>(
-  'projectManager',
+  'project-manager',
   managerSchema
 );
 

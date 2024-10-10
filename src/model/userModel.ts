@@ -89,27 +89,24 @@ userSchema.methods.toJSON = function toJSON() {
   return userObject;
 };
 
-// Static method to find UserType by credentials
+// Static method to find user by credentials
 userSchema.statics.findByCredentials = async function (
   email: string,
   password: string
 ) {
-  const UserType = await this.findOne({ email });
-  if (!UserType) {
-    throw new Error('Email or password is incorrect');
+  const foundUser = await this.findOne({ email });
+  if (!foundUser) {
+    throw new Error('Email is incorrect');
   }
-  const isMatch = await bcrypt.compare(password, UserType.password);
+  const isMatch = await bcrypt.compare(password, foundUser.password);
   if (!isMatch) {
-    throw new Error('Email or password is incorrect');
+    throw new Error(' Password is incorrect');
   }
 
-  return UserType;
+  return foundUser;
 };
 
 // Create the base model
-const UserType = mongoose.model<UserType, UserModelType>(
-  'UserType',
-  userSchema
-);
+const User = mongoose.model<UserType, UserModelType>('User', userSchema);
 
-export default UserType;
+export default User;

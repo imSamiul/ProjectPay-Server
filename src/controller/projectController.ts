@@ -102,7 +102,7 @@ export async function createNewProject(req: Request, res: Response) {
       const updatedProject = await ProjectManager.findOneAndUpdate(
         {
           _id: req.user?._id,
-          userType: 'projectManager', // Ensure you're querying the discriminator for ProjectManager
+          userType: 'project-manager', // Ensure you're querying the discriminator for ProjectManager
         },
         {
           $push: { managerProjects: savedProject._id },
