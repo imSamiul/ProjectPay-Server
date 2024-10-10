@@ -1,9 +1,9 @@
-import { IUser } from '../../interfaces/userDocumentInterface';
+import { UserType } from '../userType';
 
 declare global {
   namespace Express {
     interface Request {
-      user?: IUser; // The custom property 'user'
+      user?: UserType; // The custom property 'user'
       token?: string; // The custom property 'token'
     }
   }

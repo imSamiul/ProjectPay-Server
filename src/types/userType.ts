@@ -1,22 +1,22 @@
 import { Document, Model } from 'mongoose';
 
-// I=== Interface
-export interface IUser extends Document {
+// IUser === Type
+export type UserType = Document & {
   name: string;
   email: string;
   password: string;
   phone: string;
   tokens: { token: string }[];
-}
+};
 
-export interface IUserMethods extends IUser {
+export type UserMethodsType = UserType & {
   generateAuthToken(): Promise<string>;
   toJSON: () => object;
-}
+};
 
-export interface UserModel extends Model<IUser, object, IUserMethods> {
+export type UserModelType = Model<UserType, object, UserMethodsType> & {
   findByCredentials(
     email: string,
     password: string
-  ): Promise<IUser & IUserMethods>;
-}
+  ): Promise<UserType & UserMethodsType>;
+};

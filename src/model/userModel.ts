@@ -2,14 +2,14 @@ import mongoose from 'mongoose';
 import validator from 'validator';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import {
-  IUser,
-  IUserMethods,
-  UserModel,
-} from '../interfaces/userDocumentInterface';
+import { UserType, UserMethodsType, UserModelType } from '../types/userType';
 
-// Define base user schema
-const userSchema = new mongoose.Schema<IUser, UserModel, IUserMethods>(
+// Define base UserType schema
+const userSchema = new mongoose.Schema<
+  UserType,
+  UserModelType,
+  UserMethodsType
+>(
   {
     name: {
       type: String,
@@ -61,7 +61,7 @@ const userSchema = new mongoose.Schema<IUser, UserModel, IUserMethods>(
 );
 
 userSchema.pre('save', async function hashPassword(next) {
-  // this gives to individual user that i will save
+  // this gives to individual UserType that i will save
   if (this.isModified('password')) {
     this.password = await bcrypt.hash(this.password, 8);
   }
@@ -81,7 +81,7 @@ userSchema.methods.generateAuthToken = async function generateAuthToken() {
 };
 
 userSchema.methods.toJSON = function toJSON() {
-  const userObject: Partial<IUser> = this.toObject();
+  const userObject: Partial<UserType> = this.toObject();
 
   delete userObject.password;
   delete userObject.tokens;
@@ -89,24 +89,27 @@ userSchema.methods.toJSON = function toJSON() {
   return userObject;
 };
 
-// Static method to find user by credentials
+// Static method to find UserType by credentials
 userSchema.statics.findByCredentials = async function (
   email: string,
   password: string
 ) {
-  const user = await this.findOne({ email });
-  if (!user) {
+  const UserType = await this.findOne({ email });
+  if (!UserType) {
     throw new Error('Email or password is incorrect');
   }
-  const isMatch = await bcrypt.compare(password, user.password);
+  const isMatch = await bcrypt.compare(password, UserType.password);
   if (!isMatch) {
     throw new Error('Email or password is incorrect');
   }
 
-  return user;
+  return UserType;
 };
 
 // Create the base model
-const User = mongoose.model<IUser, UserModel>('User', userSchema);
+const UserType = mongoose.model<UserType, UserModelType>(
+  'UserType',
+  userSchema
+);
 
-export default User;
+export default UserType;
