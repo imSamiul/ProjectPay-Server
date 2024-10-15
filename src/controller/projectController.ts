@@ -44,10 +44,12 @@ export async function searchProject(req: Request, res: Response) {
 export async function getProjectDetails(req: Request, res: Response) {
   try {
     const projectCode = req.params.projectCode;
-    const project = await Project.findOne({ projectCode }).populate({
-      path: 'projectManager',
-      select: '-_id -managerProjects -phone -userType -clientList',
-    });
+    const project = await Project.findOne({ projectCode })
+      .populate({
+        path: 'projectManager',
+        select: '-_id -managerProjects -phone -userType -clientList',
+      })
+      .populate('paymentList');
     res.status(200).send(project);
   } catch (error) {
     let errorMessage = 'Failed to fetch project details';
