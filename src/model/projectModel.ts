@@ -114,7 +114,10 @@ const projectSchema = new mongoose.Schema<ProjectType>(
 );
 
 projectSchema.pre('save', function (next) {
-  this.due = this.budget - this.advance;
+  if (this.isNew) {
+    // Only calculate due when creating a new project
+    this.due = this.budget - this.advance;
+  }
   next();
 });
 
