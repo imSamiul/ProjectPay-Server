@@ -139,3 +139,33 @@ export async function createNewProject(req: Request, res: Response) {
     res.status(500).send({ message: errorMessage });
   }
 }
+
+// PATCH:
+// Update project complete status
+export async function updateProjectStatus(req: Request, res: Response) {
+  try {
+    const projectCode = req.params.projectCode;
+    const { status } = req.body;
+
+    const updatedProject = await Project.findOneAndUpdate(
+      { projectCode },
+      { status },
+      { new: true }
+    );
+
+    if (!updatedProject) {
+      return res.status(404).send('Project not found');
+    }
+
+    res.status(200).send(updatedProject);
+  } catch (error) {
+    let errorMessage = 'Failed to update project status';
+    if (error instanceof Error) {
+      errorMessage = error.message;
+    }
+
+    res.status(500).send({ message: errorMessage });
+  }
+}
+
+// DELETE:

@@ -3,6 +3,36 @@ import Client from '../model/clientModel';
 import ProjectManager from '../model/managerModel';
 import User from '../model/userModel';
 
+// GET:
+
+// Get all clients
+export async function getClientList(req: Request, res: Response) {
+  try {
+    const clientsList = await Client.find();
+    res.status(200).send({ clientsList });
+  } catch (error) {
+    let errorMessage = 'Failed to load the client list';
+    if (error instanceof Error) {
+      errorMessage = error.message;
+    }
+
+    res.status(500).send({ message: errorMessage });
+  }
+}
+// Get the user details
+export async function getUserDetails(req: Request, res: Response) {
+  try {
+    res.status(200).send({ user: req.user });
+  } catch (error) {
+    let errorMessage = 'Failed to load the client list';
+    if (error instanceof Error) {
+      errorMessage = error.message;
+    }
+
+    res.status(500).send({ message: errorMessage });
+  }
+}
+
 // POST:
 // Create a new client
 export const createUser = async (req: Request, res: Response) => {
@@ -101,32 +131,6 @@ export async function logOutUser(req: Request, res: Response) {
   }
 }
 
-// GET:
+// PATCH:
 
-// Get all clients
-export async function getClientList(req: Request, res: Response) {
-  try {
-    const clientsList = await Client.find();
-    res.status(200).send({ clientsList });
-  } catch (error) {
-    let errorMessage = 'Failed to load the client list';
-    if (error instanceof Error) {
-      errorMessage = error.message;
-    }
-
-    res.status(500).send({ message: errorMessage });
-  }
-}
-// Get the user details
-export async function getUserDetails(req: Request, res: Response) {
-  try {
-    res.status(200).send({ user: req.user });
-  } catch (error) {
-    let errorMessage = 'Failed to load the client list';
-    if (error instanceof Error) {
-      errorMessage = error.message;
-    }
-
-    res.status(500).send({ message: errorMessage });
-  }
-}
+// DELETE:

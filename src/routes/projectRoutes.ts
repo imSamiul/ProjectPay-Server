@@ -3,6 +3,7 @@ import {
   createNewProject,
   getProjectDetails,
   searchProject,
+  updateProjectStatus,
 } from '../controller/projectController';
 import auth from '../middleware/auth';
 const router = express.Router();
@@ -16,6 +17,11 @@ router.get('/projects/details/:projectCode', auth, getProjectDetails);
 router.post('/projects/create', auth, createNewProject);
 
 // PATCH:
+router.patch(
+  '/projects/updateProjectStatus/:projectCode',
+  auth,
+  updateProjectStatus
+);
 
 // DELETE:
 
