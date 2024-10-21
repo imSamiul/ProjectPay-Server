@@ -37,6 +37,7 @@ export async function addPayment(req: Request, res: Response) {
     }
 
     project.due -= paymentAmount;
+    project.totalPaid += paymentAmount;
     project.paymentList.push(payment._id);
     await project.save();
     res.status(201).send({ payment, project });
