@@ -45,7 +45,17 @@ const projectSchema = new mongoose.Schema<ProjectType>(
           'Due must be a positive number and less than or equal to the budget',
       },
     },
-
+    totalPaid: {
+      type: Number,
+      default: 0,
+      validate: {
+        validator: function (value: number) {
+          return value >= 0 && value <= this.budget;
+        },
+        message:
+          'Total Paid must be a positive number and less than or equal to the budget',
+      },
+    },
     clientName: {
       type: String,
       required: true,

@@ -5,6 +5,7 @@ export type ProjectType = Document & {
   budget: number;
   advance: number;
   due: number;
+  totalPaid: number;
   clientName: string;
   clientPhone: string;
   clientEmail: string;
