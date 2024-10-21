@@ -11,7 +11,7 @@ const generateProjects = (count: number) => {
       name: `Project ${String.fromCharCode(67 + i)}`, // Start from Project C
       budget: getRandomNumber(5000, 20000),
       advance: getRandomNumber(1000, 10000),
-      client: `clientId${i + 1}`,
+      clientName: `clientId${i + 1}`,
       clientPhone: `98765400${i % 10}`, // Ensuring 10 digits
       clientEmail: `client${i + 1}@example.com`,
       clientAddress: `${getRandomNumber(1, 999)} Street, City`,

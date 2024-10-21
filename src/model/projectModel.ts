@@ -46,7 +46,7 @@ const projectSchema = new mongoose.Schema<ProjectType>(
       },
     },
 
-    client: {
+    clientName: {
       type: String,
       required: true,
       ref: 'Client',
