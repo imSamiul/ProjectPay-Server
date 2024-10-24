@@ -3,6 +3,7 @@ import {
   createNewProject,
   getProjectDetails,
   searchProject,
+  updateProjectDetails,
   updateProjectStatus,
 } from '../controller/projectController';
 import auth from '../middleware/auth';
@@ -21,6 +22,11 @@ router.patch(
   '/projects/updateProjectStatus/:projectCode',
   auth,
   updateProjectStatus
+);
+router.patch(
+  '/projects/updateProjectDetails/:projectCode',
+  auth,
+  updateProjectDetails
 );
 
 // DELETE:

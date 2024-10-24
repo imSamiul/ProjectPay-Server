@@ -16,45 +16,18 @@ const projectSchema = new mongoose.Schema<ProjectType>(
     budget: {
       type: Number,
       required: true,
-      validate: {
-        validator: function (value: number) {
-          return value >= 0;
-        },
-        message: 'Budget must be a positive number',
-      },
     },
     advance: {
       type: Number,
       required: true,
-      validate: {
-        validator: function (value: number) {
-          return value >= 0 && value <= this.budget;
-        },
-        message:
-          'Advance must be a positive number and less than or equal to the budget',
-      },
     },
     due: {
       type: Number,
-
-      validate: {
-        validator: function (value: number) {
-          return value >= 0 && value <= this.budget;
-        },
-        message:
-          'Due must be a positive number and less than or equal to the budget',
-      },
+      default: 0,
     },
     totalPaid: {
       type: Number,
       default: 0,
-      validate: {
-        validator: function (value: number) {
-          return value >= 0 && value <= this.budget;
-        },
-        message:
-          'Total Paid must be a positive number and less than or equal to the budget',
-      },
     },
     clientName: {
       type: String,
@@ -128,8 +101,31 @@ projectSchema.pre('save', function (next) {
     // Only calculate due when creating a new project
     this.due = this.budget - this.advance;
   }
+
   next();
 });
+
+projectSchema.path('budget').validate(function (value: number) {
+  return value >= 0;
+}, 'Budget must be a positive number');
+
+projectSchema.path('advance').validate(function (value: number) {
+  console.log('this.budget', this.get('budget'));
+
+  return value >= 0 && value <= this.get('budget');
+}, 'Advance must be a positive number and less than or equal to the budget');
+
+projectSchema.path('due').validate(function (value: number) {
+  return value >= 0 && value <= this.get('budget');
+}, 'Due must be a positive number and less than or equal to the budget');
+
+projectSchema.path('totalPaid').validate(function (value: number) {
+  return (
+    value >= 0 &&
+    value <= this.get('budget') &&
+    value <= this.get('budget') - this.get('advance')
+  );
+}, 'Total Paid must be a positive number and less than or equal to the budget');
 
 const Project = mongoose.model<ProjectType>('Project', projectSchema);
 

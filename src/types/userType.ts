@@ -7,6 +7,7 @@ export type UserType = Document & {
   password: string;
   phone: string;
   tokens: { token: string }[];
+  userType: string;
 };
 
 export type UserMethodsType = UserType & {

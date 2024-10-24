@@ -3,9 +3,9 @@ import Project from '../model/projectModel';
 import ProjectManager from '../model/managerModel';
 import { generateUUID } from '../utils/uuidGenerator';
 import Fuse from 'fuse.js';
+import { ProjectType } from '../types/projectDocumentType';
 
-//GET:
-// search project for manager
+// GET: search project for manager
 export async function searchProject(req: Request, res: Response) {
   const searchQuery = req.query.q;
 
@@ -61,8 +61,7 @@ export async function getProjectDetails(req: Request, res: Response) {
   }
 }
 
-//POST:
-// create a new project
+// POST: create a new project
 export async function createNewProject(req: Request, res: Response) {
   try {
     const {
@@ -140,8 +139,7 @@ export async function createNewProject(req: Request, res: Response) {
   }
 }
 
-// PATCH:
-// Update project complete status
+// PATCH: Update project complete status
 export async function updateProjectStatus(req: Request, res: Response) {
   try {
     const projectCode = req.params.projectCode;
@@ -165,6 +163,93 @@ export async function updateProjectStatus(req: Request, res: Response) {
     }
 
     res.status(500).send({ message: errorMessage });
+  }
+}
+
+// PATCH: update project details
+
+type ProjectKeys = keyof ProjectType;
+
+const allowedUpdates: ProjectKeys[] = [
+  'name',
+  'budget',
+  'advance',
+  'clientName',
+  'clientPhone',
+  'clientEmail',
+  'clientAddress',
+  'clientDetails',
+  'endDate',
+  'demoLink',
+  'typeOfWeb',
+  'description',
+];
+
+export async function updateProjectDetails(req: Request, res: Response) {
+  const projectCode = req.params.projectCode;
+  const {
+    name,
+    budget,
+    advance,
+    clientName,
+    clientPhone,
+    clientEmail,
+    clientAddress,
+    clientDetails,
+    endDate,
+    demoLink,
+    typeOfWeb,
+    description,
+  } = req.body;
+
+  console.log(req.body);
+  console.log(projectCode);
+
+  // Extract valid updates from request body
+  const updates = Object.keys(req.body);
+
+  const isValidOperation = updates.every((update) => {
+    return allowedUpdates.includes(update as ProjectKeys);
+  });
+
+  if (!isValidOperation) {
+    return res.status(400).send({ error: 'Invalid updates!' });
+  }
+
+  try {
+    const project = await Project.findOne({ projectCode });
+    if (!project) {
+      return res.status(404).send({ error: 'Project not found' });
+    }
+
+    const updatedProject = await Project.findOneAndUpdate(
+      { projectCode },
+      {
+        name,
+        budget,
+        advance,
+        clientName,
+        clientPhone,
+        clientEmail,
+        clientAddress,
+        clientDetails,
+        endDate,
+        demoLink,
+        typeOfWeb,
+        description,
+      },
+      { new: true, runValidators: true }
+    );
+
+    res.status(200).send(updatedProject);
+  } catch (error) {
+    res.status(500).send({
+      message:
+        error instanceof Error
+          ? error.message
+          : 'Failed to update project details',
+    });
+    console.log(error);
   }
 }
 
