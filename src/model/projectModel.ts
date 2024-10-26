@@ -150,6 +150,7 @@ projectSchema.methods.reCalculateAll = async function () {
   this.due = this.budget - this.advance - this.totalPaid;
 
   await this.save();
+  return this;
 };
 
 const Project = mongoose.model<ProjectType>('Project', projectSchema);
