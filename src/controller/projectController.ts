@@ -54,12 +54,10 @@ export async function searchProject(req: Request, res: Response) {
 
     res.status(200).json(matchedProjects);
   } catch (error) {
-    res
-      .status(500)
-      .send({
-        message:
-          error instanceof Error ? error.message : 'Failed to fetch projects',
-      });
+    res.status(500).send({
+      message:
+        error instanceof Error ? error.message : 'Failed to fetch projects',
+    });
   }
 }
 
@@ -75,14 +73,12 @@ export async function getProjectDetails(req: Request, res: Response) {
       .populate('paymentList');
     res.status(200).send(project);
   } catch (error) {
-    res
-      .status(500)
-      .send({
-        message:
-          error instanceof Error
-            ? error.message
-            : 'Failed to fetch project details',
-      });
+    res.status(500).send({
+      message:
+        error instanceof Error
+          ? error.message
+          : 'Failed to fetch project details',
+    });
   }
 }
 
@@ -120,7 +116,7 @@ export async function createNewProject(req: Request, res: Response) {
       await ProjectManager.findOneAndUpdate(
         {
           _id: req.user?._id,
-          userType: 'projectManager',
+          userType: 'project manager',
         },
         {
           $push: { managerProjects: savedProject._id },
@@ -130,12 +126,10 @@ export async function createNewProject(req: Request, res: Response) {
 
     res.status(201).send(savedProject);
   } catch (error) {
-    res
-      .status(500)
-      .send({
-        message:
-          error instanceof Error ? error.message : 'Failed to create project',
-      });
+    res.status(500).send({
+      message:
+        error instanceof Error ? error.message : 'Failed to create project',
+    });
   }
 }
 
@@ -157,14 +151,12 @@ export async function updateProjectStatus(req: Request, res: Response) {
 
     res.status(200).send(updatedProject);
   } catch (error) {
-    res
-      .status(500)
-      .send({
-        message:
-          error instanceof Error
-            ? error.message
-            : 'Failed to update project status',
-      });
+    res.status(500).send({
+      message:
+        error instanceof Error
+          ? error.message
+          : 'Failed to update project status',
+    });
   }
 }
 
@@ -196,13 +188,11 @@ export async function updateProjectDetails(req: Request, res: Response) {
 
     res.status(200).send(updatedProject);
   } catch (error) {
-    res
-      .status(500)
-      .send({
-        message:
-          error instanceof Error
-            ? error.message
-            : 'Failed to update project details',
-      });
+    res.status(500).send({
+      message:
+        error instanceof Error
+          ? error.message
+          : 'Failed to update project details',
+    });
   }
 }

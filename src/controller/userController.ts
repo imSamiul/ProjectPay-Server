@@ -37,12 +37,13 @@ export async function getUserDetails(req: Request, res: Response) {
 // Create a new client
 export const createUser = async (req: Request, res: Response) => {
   const { name, email, phone, password, userType } = req.body;
+  console.log(req.body);
 
   try {
     let newUser;
 
     switch (userType) {
-      case 'Client':
+      case 'client':
         newUser = new Client({
           name,
           email,
@@ -50,7 +51,7 @@ export const createUser = async (req: Request, res: Response) => {
           password,
         });
         break;
-      case 'Project Manager':
+      case 'project manager':
         newUser = new ProjectManager({
           name,
           email,
