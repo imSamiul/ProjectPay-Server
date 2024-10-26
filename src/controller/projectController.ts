@@ -5,6 +5,30 @@ import { generateUUID } from '../utils/uuidGenerator';
 import Fuse from 'fuse.js';
 import { ProjectType } from '../types/projectDocumentType';
 
+// Helper function to extract allowed updates
+const extractAllowedUpdates = (body: Partial<ProjectType>) => {
+  const allowedUpdates: (keyof ProjectType)[] = [
+    'name',
+    'budget',
+    'advance',
+    'clientName',
+    'clientPhone',
+    'clientEmail',
+    'clientAddress',
+    'clientDetails',
+    'endDate',
+    'demoLink',
+    'typeOfWeb',
+    'description',
+  ];
+  return allowedUpdates.reduce((acc, key) => {
+    if (key in body) {
+      acc[key] = body[key];
+    }
+    return acc;
+  }, {} as Partial<ProjectType>);
+};
+
 // GET: search project for manager
 export async function searchProject(req: Request, res: Response) {
   const searchQuery = req.query.q;
@@ -16,7 +40,7 @@ export async function searchProject(req: Request, res: Response) {
   try {
     const projectManagerId = req.user?._id;
     const projects = await Project.find({
-      projectManager: projectManagerId, // Ensure this is filtering by manager
+      projectManager: projectManagerId,
     });
     const options = {
       includeScore: true,
@@ -25,22 +49,21 @@ export async function searchProject(req: Request, res: Response) {
     };
 
     const fuse = new Fuse(projects, options);
-
     const result = fuse.search(searchQuery);
     const matchedProjects = result.map((res) => res.item);
 
     res.status(200).json(matchedProjects);
   } catch (error) {
-    let errorMessage = 'Failed to fetch projects';
-    if (error instanceof Error) {
-      errorMessage = error.message;
-    }
-
-    res.status(500).send({ message: errorMessage });
+    res
+      .status(500)
+      .send({
+        message:
+          error instanceof Error ? error.message : 'Failed to fetch projects',
+      });
   }
 }
 
-// get the project details
+// GET: get the project details
 export async function getProjectDetails(req: Request, res: Response) {
   try {
     const projectCode = req.params.projectCode;
@@ -52,62 +75,40 @@ export async function getProjectDetails(req: Request, res: Response) {
       .populate('paymentList');
     res.status(200).send(project);
   } catch (error) {
-    let errorMessage = 'Failed to fetch project details';
-    if (error instanceof Error) {
-      errorMessage = error.message;
-    }
-
-    res.status(500).send({ message: errorMessage });
+    res
+      .status(500)
+      .send({
+        message:
+          error instanceof Error
+            ? error.message
+            : 'Failed to fetch project details',
+      });
   }
 }
 
 // POST: create a new project
 export async function createNewProject(req: Request, res: Response) {
   try {
-    const {
-      name,
-      budget,
-      advance,
-      clientName,
-      clientPhone,
-      clientEmail,
-      clientAddress,
-      clientDetails,
-      startDate,
-      endDate,
-      demoLink,
-      typeOfWeb,
-      description,
-      status,
-    } = req.body;
+    const projectData = extractAllowedUpdates(req.body);
+    const { startDate, status } = req.body;
 
     let projectCode;
     let existingProjectCode;
 
     do {
-      projectCode = generateUUID(); // Generate new UUID
+      projectCode = generateUUID();
       existingProjectCode = await Project.findOne({ projectCode });
     } while (existingProjectCode);
 
     const newProject = new Project({
       projectCode,
-      name,
-      budget,
-      advance,
-      clientName,
-      clientPhone,
-      clientEmail,
-      clientAddress,
-      clientDetails,
+      ...projectData,
       startDate,
-      endDate,
-      demoLink,
-      typeOfWeb,
-      description,
       status,
       projectManager: req.user?._id,
     });
-    const existingProject = await Project.findOne({ name });
+
+    const existingProject = await Project.findOne({ name: projectData.name });
 
     if (existingProject) {
       return res.status(400).send('Project already exists');
@@ -119,23 +120,22 @@ export async function createNewProject(req: Request, res: Response) {
       await ProjectManager.findOneAndUpdate(
         {
           _id: req.user?._id,
-          userType: 'projectManager', // Ensure you're querying the discriminator for ProjectManager
+          userType: 'projectManager',
         },
         {
           $push: { managerProjects: savedProject._id },
         }
-        // Return the updated document, and create it if it doesn't exist
       );
     }
 
     res.status(201).send(savedProject);
   } catch (error) {
-    let errorMessage = 'Failed to do something exceptional';
-    if (error instanceof Error) {
-      errorMessage = error.message;
-    }
-
-    res.status(500).send({ message: errorMessage });
+    res
+      .status(500)
+      .send({
+        message:
+          error instanceof Error ? error.message : 'Failed to create project',
+      });
   }
 }
 
@@ -157,59 +157,23 @@ export async function updateProjectStatus(req: Request, res: Response) {
 
     res.status(200).send(updatedProject);
   } catch (error) {
-    let errorMessage = 'Failed to update project status';
-    if (error instanceof Error) {
-      errorMessage = error.message;
-    }
-
-    res.status(500).send({ message: errorMessage });
+    res
+      .status(500)
+      .send({
+        message:
+          error instanceof Error
+            ? error.message
+            : 'Failed to update project status',
+      });
   }
 }
 
 // PATCH: update project details
-
-type ProjectKeys = keyof ProjectType;
-
-const allowedUpdates: ProjectKeys[] = [
-  'name',
-  'budget',
-  'advance',
-  'clientName',
-  'clientPhone',
-  'clientEmail',
-  'clientAddress',
-  'clientDetails',
-  'endDate',
-  'demoLink',
-  'typeOfWeb',
-  'description',
-];
-
 export async function updateProjectDetails(req: Request, res: Response) {
   const projectCode = req.params.projectCode;
-  const {
-    name,
-    budget,
-    advance,
-    clientName,
-    clientPhone,
-    clientEmail,
-    clientAddress,
-    clientDetails,
-    endDate,
-    demoLink,
-    typeOfWeb,
-    description,
-  } = req.body;
+  const updates = extractAllowedUpdates(req.body);
 
-  // Extract valid updates from request body
-  const updates = Object.keys(req.body);
-
-  const isValidOperation = updates.every((update) => {
-    return allowedUpdates.includes(update as ProjectKeys);
-  });
-
-  if (!isValidOperation) {
+  if (Object.keys(updates).length === 0) {
     return res.status(400).send({ error: 'Invalid updates!' });
   }
 
@@ -222,33 +186,23 @@ export async function updateProjectDetails(req: Request, res: Response) {
     const updatedProject = await Project.findOneAndUpdate(
       { projectCode },
       {
-        name,
-        budget,
-        advance,
-        clientName,
-        clientPhone,
-        clientEmail,
-        clientAddress,
-        clientDetails,
-        endDate,
-        demoLink,
-        typeOfWeb,
-        description,
-        due: budget - advance - project.totalPaid,
+        ...updates,
+        due: updates.budget
+          ? updates.budget - (updates.advance ?? 0) - project.totalPaid
+          : project.due,
       },
       { new: true, runValidators: true }
     );
 
     res.status(200).send(updatedProject);
   } catch (error) {
-    res.status(500).send({
-      message:
-        error instanceof Error
-          ? error.message
-          : 'Failed to update project details',
-    });
-    console.log(error);
+    res
+      .status(500)
+      .send({
+        message:
+          error instanceof Error
+            ? error.message
+            : 'Failed to update project details',
+      });
   }
 }
-
-// DELETE:
