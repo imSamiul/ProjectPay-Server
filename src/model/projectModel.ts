@@ -110,8 +110,6 @@ projectSchema.path('budget').validate(function (value: number) {
 }, 'Budget must be a positive number');
 
 projectSchema.path('advance').validate(function (value: number) {
-  console.log('this.budget', this.get('budget'));
-
   return value >= 0 && value <= this.get('budget');
 }, 'Advance must be a positive number and less than or equal to the budget');
 
@@ -120,6 +118,8 @@ projectSchema.path('due').validate(function (value: number) {
 }, 'Due must be a positive number and less than or equal to the budget');
 
 projectSchema.path('totalPaid').validate(function (value: number) {
+  console.log(this.get('budget'), this.get('advance'), value);
+
   return (
     value >= 0 &&
     value <= this.get('budget') &&
