@@ -48,6 +48,44 @@ export async function addPayment(req: Request, res: Response) {
   }
 }
 
-// PATCH:
+// PATCH: update payment details
+export async function updatePayment(req: Request, res: Response) {
+  const paymentId = req.params.paymentId;
+  const {
+    paymentAmount,
+    paymentMethod,
+    transactionId,
+    paymentDate,
+    projectId,
+  } = req.body;
+  try {
+    const updatedPayment = await Payment.findByIdAndUpdate(
+      { _id: paymentId },
+      {
+        paymentAmount,
+        paymentMethod,
+        transactionId,
+        paymentDate,
+        projectId,
+      },
+      { new: true }
+    );
+
+    if (!updatedPayment) {
+      return res.status(404).send('Payment not found');
+    }
+    const existingProject = await Project.findById(projectId);
+    if (!existingProject) {
+      return res.status(404).send('Project not found');
+    }
+    const updatedProject = await existingProject.reCalculateAll();
+    res.status(200).send({ updatedPayment, updatedProject });
+  } catch (error) {
+    res.status(500).send({
+      message:
+        error instanceof Error ? error.message : 'Failed to update payment',
+    });
+  }
+}
 
 // DELETE:

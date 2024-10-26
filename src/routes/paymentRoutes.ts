@@ -1,6 +1,6 @@
 import express from 'express';
 import auth from '../middleware/auth';
-import { addPayment } from '../controller/paymentController';
+import { addPayment, updatePayment } from '../controller/paymentController';
 const router = express.Router();
 
 // GET:
@@ -10,6 +10,7 @@ const router = express.Router();
 router.post('/payment/add', auth, addPayment);
 
 // PATCH:
+router.patch('/payment/update/:paymentId', auth, updatePayment);
 
 // DELETE:
 

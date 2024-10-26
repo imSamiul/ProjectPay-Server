@@ -127,6 +127,31 @@ projectSchema.path('totalPaid').validate(function (value: number) {
   );
 }, 'Total Paid must be a positive number and less than or equal to the budget');
 
+projectSchema.methods.reCalculateAll = async function () {
+  // this.due = this.budget - this.advance;
+
+  const result = await this.model('Payment').aggregate([
+    {
+      $match: {
+        projectId: this._id,
+      },
+    },
+    {
+      $group: {
+        _id: '$projectId',
+        totalPaid: {
+          $sum: '$paymentAmount',
+        },
+      },
+    },
+  ]);
+
+  this.totalPaid = result[0]?.totalPaid || 0;
+  this.due = this.budget - this.advance - this.totalPaid;
+
+  await this.save();
+};
+
 const Project = mongoose.model<ProjectType>('Project', projectSchema);
 
 export default Project;

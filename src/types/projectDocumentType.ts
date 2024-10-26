@@ -20,4 +20,5 @@ export type ProjectType = Document & {
   verifiedClientList: Types.ObjectId[];
   projectManager: Types.ObjectId;
   paymentList: Types.ObjectId[];
+  reCalculateAll: () => void;
 };
