@@ -88,4 +88,27 @@ export async function updatePayment(req: Request, res: Response) {
   }
 }
 
-// DELETE:
+// DELETE: delete payment
+export async function deletePayment(req: Request, res: Response) {
+  const paymentId = req.params.paymentId;
+  try {
+    const payment = await Payment.findByIdAndDelete(paymentId);
+    if (!payment) {
+      return res.status(404).send('Payment not found');
+    }
+    const project = await Project.findById({ _id: payment.projectId });
+    if (!project) {
+      return res.status(404).send('Project not found');
+    }
+
+    const updatedProject = await project.reCalculateAll();
+    console.log(updatedProject);
+
+    res.status(200).send({ payment, updatedProject });
+  } catch (error) {
+    res.status(500).send({
+      message:
+        error instanceof Error ? error.message : 'Failed to delete payment',
+    });
+  }
+}
