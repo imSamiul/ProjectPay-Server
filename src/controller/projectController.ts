@@ -202,9 +202,6 @@ export async function updateProjectDetails(req: Request, res: Response) {
     description,
   } = req.body;
 
-  console.log(req.body);
-  console.log(projectCode);
-
   // Extract valid updates from request body
   const updates = Object.keys(req.body);
 
@@ -237,6 +234,7 @@ export async function updateProjectDetails(req: Request, res: Response) {
         demoLink,
         typeOfWeb,
         description,
+        due: budget - advance - project.totalPaid,
       },
       { new: true, runValidators: true }
     );
