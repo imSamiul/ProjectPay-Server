@@ -72,6 +72,9 @@ export async function getProjectDetails(req: Request, res: Response) {
         select: '-_id -managerProjects -phone -userType -clientList',
       })
       .populate('paymentList');
+    if (!project) {
+      return res.status(404).send('Project not found');
+    }
     res.status(200).send(project);
   } catch (error) {
     res.status(500).send({
