@@ -1,16 +1,20 @@
+import path from 'path';
+import dotenv from 'dotenv';
+
 import express from 'express';
 import cors from 'cors';
 import userRoutes from './routes/userRoutes';
 import projectRoutes from './routes/projectRoutes';
 import managerRoutes from './routes/managerRoutes';
 import paymentRoutes from './routes/paymentRoutes';
-import path from 'path';
-import dotenv from 'dotenv';
 import connectDB from './db/mongoose';
 
-dotenv.config({
-  path: path.resolve(__dirname, '../config/dev.env'),
-});
+const env = process.env.NODE_ENV?.trim() || 'development';
+
+const envPath = path.resolve(__dirname, `../config/.env.${env}`);
+console.log(envPath);
+
+dotenv.config({ path: envPath });
 
 connectDB();
 
