@@ -3,15 +3,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const express_1 = __importDefault(require("express"));
-const dotenv_1 = __importDefault(require("dotenv"));
-//For env File
-dotenv_1.default.config();
-const app = (0, express_1.default)();
-const port = process.env.PORT || 8000;
-app.get("/", (req, res) => {
-    res.send("Welcome to Express & TypeScript Server");
+const app_1 = __importDefault(require("./app"));
+const port = process.env.PORT;
+app_1.default.get('/', (req, res) => {
+    res.send('Hello World!');
 });
-app.listen(port, () => {
-    console.log(`Server is Fire at http://localhost:${port}`);
+app_1.default.listen(port, () => {
+    console.log(`Server is up on port ${port}`);
 });

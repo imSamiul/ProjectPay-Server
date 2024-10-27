@@ -1,5 +1,5 @@
 {
-  "name": "ProjectPay-server",
+  "name": "projectpay-server",
   "version": "1.0.0",
   "description": "Project Pay app backend",
   "main": "index.js",
