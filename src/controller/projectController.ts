@@ -4,6 +4,7 @@ import ProjectManager from '../model/managerModel';
 import { generateUUID } from '../utils/uuidGenerator';
 import Fuse from 'fuse.js';
 import { ProjectType } from '../types/projectDocumentType';
+import Payment from '../model/paymentModel';
 
 // Helper function to extract allowed updates
 const extractAllowedUpdates = (body: Partial<ProjectType>) => {
@@ -193,6 +194,31 @@ export async function updateProjectDetails(req: Request, res: Response) {
         error instanceof Error
           ? error.message
           : 'Failed to update project details',
+    });
+  }
+}
+
+// DELETE: delete project
+export async function deleteProject(req: Request, res: Response) {
+  try {
+    const projectId = req.params.projectId;
+    const project = await Project.findOneAndDelete({ _id: projectId });
+
+    if (!project) {
+      return res.status(404).send('Project not found');
+    }
+
+    // Get payment IDs from the deleted project's paymentList field
+    const paymentIds = project.paymentList;
+
+    // Delete all payments related to the project using the IDs in paymentList
+    await Payment.deleteMany({ _id: { $in: paymentIds } });
+
+    res.status(200).send(project);
+  } catch (error) {
+    res.status(500).send({
+      message:
+        error instanceof Error ? error.message : 'Failed to delete project',
     });
   }
 }

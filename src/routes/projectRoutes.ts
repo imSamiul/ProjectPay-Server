@@ -1,6 +1,7 @@
 import express from 'express';
 import {
   createNewProject,
+  deleteProject,
   getProjectDetails,
   searchProject,
   updateProjectDetails,
@@ -30,5 +31,6 @@ router.patch(
 );
 
 // DELETE:
+router.delete('/projects/delete/:projectId', auth, deleteProject);
 
 export default router;
