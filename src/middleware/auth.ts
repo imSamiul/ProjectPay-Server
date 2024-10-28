@@ -16,6 +16,7 @@ const auth = async (req: Request, res: Response, next: NextFunction) => {
 
     const token = authHeader.replace('Bearer ', '').trim();
 
+
     if (!token) {
       throw new Error('Authentication token is missing');
     }
@@ -28,7 +29,7 @@ const auth = async (req: Request, res: Response, next: NextFunction) => {
 
     const user = await User.findOne({ _id: id, 'tokens.token': token });
     if (!user) {
-      throw new Error();
+      throw new Error('User not found');
     }
     req.token = token;
     req.user = user;
@@ -36,10 +37,12 @@ const auth = async (req: Request, res: Response, next: NextFunction) => {
   } catch (error) {
     if (error instanceof Error) {
       console.log(error.message); // Log the error message
-      res.status(401).send({ error: error.message });
+      res.status(401).json({ message: error.message });
     } else {
       console.log('An unexpected error occurred', error);
-      res.status(401).send({ error: 'Not authorized to access this resource' });
+      res
+        .status(401)
+        .json({ message: 'Not authorized to access this resource' });
     }
   }
 };
