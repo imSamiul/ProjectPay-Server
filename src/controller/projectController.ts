@@ -51,14 +51,20 @@ export async function searchProject(req: Request, res: Response) {
 
     const fuse = new Fuse(projects, options);
     const result = fuse.search(searchQuery);
+
     const matchedProjects = result.map((res) => res.item);
 
     res.status(200).json(matchedProjects);
   } catch (error) {
-    res.status(500).send({
-      message:
-        error instanceof Error ? error.message : 'Failed to fetch projects',
+    let errorMessage = 'Failed to do something exceptional';
+    if (error instanceof Error) {
+      errorMessage = error.message;
+    }
+
+    res.status(500).json({
+      message: errorMessage,
     });
+    console.log(error);
   }
 }
 
@@ -73,16 +79,18 @@ export async function getProjectDetails(req: Request, res: Response) {
       })
       .populate('paymentList');
     if (!project) {
-      return res.status(404).send('Project not found');
+      return res.status(404).json({ message: 'Project not found' });
     }
-    res.status(200).send(project);
+    res.status(200).json(project);
   } catch (error) {
-    res.status(500).send({
-      message:
-        error instanceof Error
-          ? error.message
-          : 'Failed to fetch project details',
+    let errorMessage = 'Failed to fetch project details';
+    if (error instanceof Error) {
+      errorMessage = error.message;
+    }
+    res.status(500).json({
+      message: errorMessage,
     });
+    console.log(error);
   }
 }
 
@@ -111,7 +119,7 @@ export async function createNewProject(req: Request, res: Response) {
     const existingProject = await Project.findOne({ name: projectData.name });
 
     if (existingProject) {
-      return res.status(400).send('Project already exists');
+      return res.status(400).json({ message: 'Project already exists' });
     }
 
     const savedProject = await newProject.save();
@@ -128,12 +136,16 @@ export async function createNewProject(req: Request, res: Response) {
       );
     }
 
-    res.status(201).send(savedProject);
+    res.status(201).json(savedProject);
   } catch (error) {
-    res.status(500).send({
-      message:
-        error instanceof Error ? error.message : 'Failed to create project',
+    let errorMessage = 'Failed to create project';
+    if (error instanceof Error) {
+      errorMessage = error.message;
+    }
+    res.status(500).json({
+      message: errorMessage,
     });
+    console.log(error);
   }
 }
 
@@ -150,17 +162,19 @@ export async function updateProjectStatus(req: Request, res: Response) {
     );
 
     if (!updatedProject) {
-      return res.status(404).send('Project not found');
+      return res.status(404).json({ message: 'Project not found' });
     }
 
-    res.status(200).send(updatedProject);
+    res.status(200).json(updatedProject);
   } catch (error) {
-    res.status(500).send({
-      message:
-        error instanceof Error
-          ? error.message
-          : 'Failed to update project status',
+    let errorMessage = 'Failed to update project status';
+    if (error instanceof Error) {
+      errorMessage = error.message;
+    }
+    res.status(500).json({
+      message: errorMessage,
     });
+    console.log(error);
   }
 }
 
@@ -170,13 +184,13 @@ export async function updateProjectDetails(req: Request, res: Response) {
   const updates = extractAllowedUpdates(req.body);
 
   if (Object.keys(updates).length === 0) {
-    return res.status(400).send({ error: 'Invalid updates!' });
+    return res.status(400).json({ message: 'Invalid updates!' });
   }
 
   try {
     const project = await Project.findOne({ projectCode });
     if (!project) {
-      return res.status(404).send({ error: 'Project not found' });
+      return res.status(404).json({ message: 'Project not found' });
     }
 
     const updatedProject = await Project.findOneAndUpdate(
@@ -190,14 +204,16 @@ export async function updateProjectDetails(req: Request, res: Response) {
       { new: true, runValidators: true }
     );
 
-    res.status(200).send(updatedProject);
+    res.status(200).json(updatedProject);
   } catch (error) {
-    res.status(500).send({
-      message:
-        error instanceof Error
-          ? error.message
-          : 'Failed to update project details',
+    let errorMessage = 'Failed to update project details';
+    if (error instanceof Error) {
+      errorMessage = error.message;
+    }
+    res.status(500).json({
+      message: errorMessage,
     });
+    console.log(error);
   }
 }
 
@@ -208,7 +224,7 @@ export async function deleteProject(req: Request, res: Response) {
     const project = await Project.findOneAndDelete({ _id: projectId });
 
     if (!project) {
-      return res.status(404).send('Project not found');
+      return res.status(404).json({ message: 'Project not found' });
     }
 
     // Get payment IDs from the deleted project's paymentList field
@@ -217,11 +233,15 @@ export async function deleteProject(req: Request, res: Response) {
     // Delete all payments related to the project using the IDs in paymentList
     await Payment.deleteMany({ _id: { $in: paymentIds } });
 
-    res.status(200).send(project);
+    res.status(200).json(project);
   } catch (error) {
-    res.status(500).send({
-      message:
-        error instanceof Error ? error.message : 'Failed to delete project',
+    let errorMessage = 'Failed to delete project';
+    if (error instanceof Error) {
+      errorMessage = error.message;
+    }
+    res.status(500).json({
+      message: errorMessage,
     });
+    console.log(error);
   }
 }

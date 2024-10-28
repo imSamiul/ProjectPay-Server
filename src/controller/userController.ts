@@ -15,6 +15,7 @@ export async function getClientList(req: Request, res: Response) {
     }
 
     res.status(500).json({ message: errorMessage });
+    console.log(error);
   }
 }
 // GET: Get the user details
@@ -28,6 +29,7 @@ export async function getUserDetails(req: Request, res: Response) {
     }
 
     res.status(500).json({ message: errorMessage });
+    console.log(error);
   }
 }
 
@@ -82,10 +84,11 @@ export const createUser = async (req: Request, res: Response) => {
     }
 
     res.status(500).json({ message: errorMessage });
+    console.log(error);
   }
 };
 
-// Login User
+// POST: Login User
 export async function loginUser(req: Request, res: Response) {
   const { email, password } = req.body;
   try {
@@ -102,9 +105,10 @@ export async function loginUser(req: Request, res: Response) {
     }
 
     res.status(500).json({ message: errorMessage });
+    console.log(error);
   }
 }
-// Logout User
+// POST: Logout User
 export async function logOutUser(req: Request, res: Response) {
   try {
     const checkIfTokenExists = req.user!.tokens.find((token) => {
@@ -126,6 +130,7 @@ export async function logOutUser(req: Request, res: Response) {
     }
 
     res.status(500).json({ message: errorMessage });
+    console.log(error);
   }
 }
 
