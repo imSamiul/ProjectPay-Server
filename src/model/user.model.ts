@@ -2,6 +2,7 @@ import mongoose from 'mongoose';
 import validator from 'validator';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+
 import { UserType, UserMethodsType, UserModelType } from '../types/userType';
 
 // Define base UserType schema
@@ -16,6 +17,12 @@ const userSchema = new mongoose.Schema<
       required: true,
       trim: true,
     },
+    googleId: {
+      type: String,
+    },
+    photo: {
+      type: String,
+    },
     email: {
       type: String,
       required: true,
@@ -28,9 +35,9 @@ const userSchema = new mongoose.Schema<
         }
       },
     },
+
     password: {
       type: String,
-      required: true,
       minlength: 6,
       trim: true,
       validate: (value: string) => {
@@ -39,6 +46,11 @@ const userSchema = new mongoose.Schema<
         }
       },
     },
+    role: {
+      type: String,
+      enum: ['admin', 'client', 'project_manager'],
+    },
+
     tokens: [
       {
         token: {
@@ -47,16 +59,10 @@ const userSchema = new mongoose.Schema<
         },
       },
     ],
-    phone: {
-      type: String,
-      required: true,
-      trim: true,
-    },
   },
-
   {
-    discriminatorKey: 'userType',
     timestamps: true,
+    discriminatorKey: 'role',
   }
 );
 
@@ -74,7 +80,9 @@ userSchema.methods.generateAuthToken = async function generateAuthToken() {
   if (!secretKey) {
     throw new Error('Secret key is not provided');
   }
-  const token = jwt.sign({ id: this.id.toString() }, secretKey);
+  const token = jwt.sign({ id: this.id.toString() }, secretKey, {
+    expiresIn: '7d',
+  });
   this.tokens = this.tokens.concat({ token });
   await this.save();
   return token;
@@ -84,7 +92,6 @@ userSchema.methods.toJSON = function toJSON() {
   const userObject: Partial<UserType> = this.toObject();
 
   delete userObject.password;
-  delete userObject.tokens;
 
   return userObject;
 };
@@ -96,11 +103,11 @@ userSchema.statics.findByCredentials = async function (
 ) {
   const foundUser = await this.findOne({ email });
   if (!foundUser) {
-    throw new Error('Email is incorrect');
+    throw new Error('Incorrect credentials');
   }
   const isMatch = await bcrypt.compare(password, foundUser.password);
   if (!isMatch) {
-    throw new Error(' Password is incorrect');
+    throw new Error('Incorrect credentials');
   }
 
   return foundUser;

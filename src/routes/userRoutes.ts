@@ -1,21 +1,20 @@
 import express from 'express';
+import { addUserOtherInfo, getUserDetails } from '../controller/userController';
+
 import {
-  createUser,
-  getUserDetails,
-  loginUser,
-  logOutUser,
-} from '../controller/userController';
-import auth from '../middleware/auth';
+  ensureAuthenticated,
+  ensureUserExists,
+} from '../middleware/passport-auth';
 
 const router = express.Router();
 
 // GET:
-router.get('/user/me', auth, getUserDetails);
+router.get('/user/me', ensureUserExists, getUserDetails);
 
 // POST:
-router.post('/user/signUp', createUser);
-router.post('/user/login', loginUser);
-router.post('/user/logout', auth, logOutUser);
+router.post('/user/addOtherInfo', ensureAuthenticated, addUserOtherInfo);
+
+// router.post('/user/logout', auth, logOutUser);
 
 // PATCH:
 

@@ -1,5 +1,7 @@
+// TODO: will delete auth.ts
+
 import jwt from 'jsonwebtoken';
-import User from '../model/userModel';
+import User from '../model/user.model';
 import { Request, Response, NextFunction } from 'express';
 
 type JwtPayload = {
@@ -15,7 +17,6 @@ const auth = async (req: Request, res: Response, next: NextFunction) => {
     }
 
     const token = authHeader.replace('Bearer ', '').trim();
-
 
     if (!token) {
       throw new Error('Authentication token is missing');

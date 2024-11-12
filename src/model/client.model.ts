@@ -1,12 +1,18 @@
 import mongoose from 'mongoose';
 
-import { UserType, UserModelType } from '../types/userType';
-import User from './userModel';
+import { ClientType } from '../types/clientType';
 
-const clientSchema = new mongoose.Schema(
+const clientSchema = new mongoose.Schema<ClientType>(
   {
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+    },
+    clientPhone: {
+      type: String,
+    },
     // Specific fields for the client
-    projects: [
+    clientProjects: [
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Project',
@@ -19,9 +25,6 @@ const clientSchema = new mongoose.Schema(
 );
 
 // Use discriminator to extend the base schema for clients
-const Client = User.discriminator<UserType, UserModelType>(
-  'client',
-  clientSchema
-);
+const Client = mongoose.model<ClientType>('Client', clientSchema);
 
 export default Client;

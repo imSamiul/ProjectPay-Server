@@ -1,13 +1,20 @@
-import { Document, HydratedDocument, Model } from 'mongoose';
+import mongoose, { Document, HydratedDocument, Model } from 'mongoose';
 
-// IUser === Type
 export type UserType = Document & {
+  _id?: mongoose.Types.ObjectId;
+  name: string;
+  googleId: string;
+  photo?: string;
+  email: string;
+  password: string;
+  role?: 'client' | 'admin' | 'project_manager';
+  tokens: { token: string }[];
+};
+
+export type SignUpFormType = {
   name: string;
   email: string;
   password: string;
-  phone: string;
-  tokens: { token: string }[];
-  userType: 'client' | 'project manager' | 'admin';
 };
 
 export type UserMethodsType = UserType & {

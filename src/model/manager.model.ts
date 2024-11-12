@@ -1,9 +1,17 @@
 import mongoose from 'mongoose';
-import User from './userModel';
-import { ManagerModelType, ManagerType } from '../types/managerType';
+
+import { ManagerType } from '../types/managerType';
 
 const managerSchema = new mongoose.Schema<ManagerType>(
   {
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      // TODO: Add required: true
+    },
+    managerPhone: {
+      type: String,
+    },
     managerProjects: [
       {
         type: mongoose.Schema.Types.ObjectId,
@@ -23,8 +31,8 @@ const managerSchema = new mongoose.Schema<ManagerType>(
 );
 
 // Update: Pass UserModel instead of IUser
-const ProjectManager = User.discriminator<ManagerType, ManagerModelType>(
-  'project manager',
+const ProjectManager = mongoose.model<ManagerType>(
+  'ProjectManager',
   managerSchema
 );
 

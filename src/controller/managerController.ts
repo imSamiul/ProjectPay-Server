@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
-import Project from '../model/projectModel';
+import Project from '../model/project.model';
+import { UserType } from '../types/userType';
 
 // GET:
 // get all projects for manager
@@ -8,7 +9,8 @@ export async function getManagerProjects(req: Request, res: Response) {
   const pageNumber = Number(pageParam);
   const limitNumber = Number(limit);
   try {
-    const projects = await Project.find({ projectManager: req.user?._id })
+    const user = req.user as UserType;
+    const projects = await Project.find({ projectManager: user?._id })
       .skip((pageNumber - 1) * limitNumber)
       .limit(limitNumber);
     res.status(200).send({ projects });
