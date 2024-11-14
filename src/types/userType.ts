@@ -22,6 +22,8 @@ export type UserMethodsType = UserType & {
   toJSON: () => object;
 };
 
+export type UserInstanceType = HydratedDocument<UserType> & UserMethodsType;
+
 export type UserModelType = Model<UserType, object, UserMethodsType> & {
   findByCredentials(
     email: string,

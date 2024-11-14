@@ -50,15 +50,6 @@ const userSchema = new mongoose.Schema<
       type: String,
       enum: ['admin', 'client', 'project_manager'],
     },
-
-    tokens: [
-      {
-        token: {
-          type: String,
-          required: true,
-        },
-      },
-    ],
   },
   {
     timestamps: true,
@@ -83,8 +74,7 @@ userSchema.methods.generateAuthToken = async function generateAuthToken() {
   const token = jwt.sign({ id: this.id.toString() }, secretKey, {
     expiresIn: '7d',
   });
-  this.tokens = this.tokens.concat({ token });
-  await this.save();
+
   return token;
 };
 

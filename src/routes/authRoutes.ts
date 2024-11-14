@@ -2,37 +2,53 @@ import express, { Request, Response } from 'express';
 import passport from 'passport';
 
 import { createUserUsingForm } from '../controller/authController';
-import { UserType } from '../types/userType';
+import { UserInstanceType } from '../types/userType';
+import { ensureAuthenticated } from '../middleware/passport-auth';
 
 const router = express.Router();
 
 // signup route using form
 router.post('/signup', createUserUsingForm);
 // login route using form
-router.post('/login', (req, res, next) => {
-  console.log(req);
 
+router.post('/login', (req, res, next) => {
   passport.authenticate(
     'local',
-    (err: Error, user: UserType, info: { message: string }) => {
+    async (err: Error, user: UserInstanceType, info: { message: string }) => {
       if (err) {
         return res.status(500).json({ message: err.message });
       }
       if (!user) {
         return res.status(400).json({ message: info.message });
       }
-      req.logIn(user, (err) => {
+
+      // Log the user in
+      req.logIn(user, async (err) => {
         if (err) {
           return res.status(500).json({ message: err.message });
         }
-        return res.status(200).json({ user });
+
+        try {
+          // Generate an auth token
+          const token = await user.generateAuthToken();
+
+          // Return user info and token to the client
+          return res.status(200).json({ user, token });
+        } catch (error) {
+          let errorMessage = 'Failed to do something exceptional';
+          if (error instanceof Error) {
+            errorMessage = error.message;
+          }
+
+          res.status(500).json({ message: errorMessage });
+        }
       });
     }
   )(req, res, next);
 });
-// logout route
 
-router.post('/logout', (req: Request, res: Response) => {
+// logout route
+router.post('/logout', ensureAuthenticated, (req: Request, res: Response) => {
   req.logout((err) => {
     if (err) {
       return res.status(500).json({ message: err.message });
