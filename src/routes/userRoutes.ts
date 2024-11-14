@@ -14,8 +14,6 @@ router.get('/user/me', ensureUserExists, getUserDetails);
 // POST:
 router.post('/user/addOtherInfo', ensureAuthenticated, addUserOtherInfo);
 
-// router.post('/user/logout', auth, logOutUser);
-
 // PATCH:
 
 // DELETE:
