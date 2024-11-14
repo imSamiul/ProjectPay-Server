@@ -1,7 +1,7 @@
 // TODO: will delete auth.ts
 
 import jwt from 'jsonwebtoken';
-import User from '../model/user.model';
+import User from '../models/user.model';
 import { Request, Response, NextFunction } from 'express';
 
 type JwtPayload = {

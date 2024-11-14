@@ -1,10 +1,10 @@
 import express from 'express';
-import auth from '../middleware/auth';
+import auth from '../middlewares/auth';
 import {
   addPayment,
   deletePayment,
   updatePayment,
-} from '../controller/paymentController';
+} from '../controllers/paymentController';
 const router = express.Router();
 
 // GET:

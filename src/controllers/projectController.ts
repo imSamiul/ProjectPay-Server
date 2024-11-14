@@ -1,10 +1,10 @@
 import { Request, Response } from 'express';
-import Project from '../model/project.model';
-import ProjectManager from '../model/manager.model';
+import Project from '../models/project.model';
+import ProjectManager from '../models/manager.model';
 import { generateUUID } from '../utils/uuidGenerator';
 import Fuse from 'fuse.js';
 import { ProjectType } from '../types/projectDocumentType';
-import Payment from '../model/payment.model';
+import Payment from '../models/payment.model';
 import { UserType } from '../types/userType';
 
 // Helper function to extract allowed updates

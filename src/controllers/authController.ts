@@ -1,7 +1,7 @@
-import { Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 
-import { SignUpFormType } from '../types/userType';
-import User from '../model/user.model';
+import { SignUpFormType, UserInstanceType } from '../types/userType';
+import User from '../models/user.model';
 import passport from 'passport';
 import jwt from 'jsonwebtoken';
 
@@ -78,3 +78,52 @@ export async function createUserUsingForm(req: Request, res: Response) {
 }
 
 // POST: Login User using form
+export const handleLogin = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  passport.authenticate(
+    'local',
+    async (err: Error, user: UserInstanceType, info: { message: string }) => {
+      if (err) {
+        return res.status(500).json({ message: err.message });
+      }
+      if (!user) {
+        return res.status(400).json({ message: info.message });
+      }
+
+      // Log the user in
+      req.logIn(user, async (err) => {
+        if (err) {
+          return res.status(500).json({ message: err.message });
+        }
+
+        try {
+          // Generate an auth token
+          const token = await user.generateAuthToken();
+
+          // Return user info and token to the client
+          return res.status(200).json({ user, token });
+        } catch (error) {
+          let errorMessage = 'Failed to generate authentication token';
+          if (error instanceof Error) {
+            errorMessage = error.message;
+          }
+
+          return res.status(500).json({ message: errorMessage });
+        }
+      });
+    }
+  )(req, res, next);
+};
+
+// POST: Logout user
+export const handleLogout = (req: Request, res: Response) => {
+  req.logout((err) => {
+    if (err) {
+      return res.status(500).json({ message: err.message });
+    }
+    res.status(200).json({ message: 'logout successful' });
+  });
+};

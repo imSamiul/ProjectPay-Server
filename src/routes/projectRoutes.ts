@@ -6,8 +6,8 @@ import {
   searchProject,
   updateProjectDetails,
   updateProjectStatus,
-} from '../controller/projectController';
-import auth from '../middleware/auth';
+} from '../controllers/projectController';
+import auth from '../middlewares/auth';
 const router = express.Router();
 
 // GET:

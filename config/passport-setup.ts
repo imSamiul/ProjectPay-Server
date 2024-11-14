@@ -1,7 +1,7 @@
 import passport from 'passport';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 import { Strategy as LocalStrategy } from 'passport-local';
-import User from '../src/model/user.model';
+import User from '../src/models/user.model';
 import { UserType } from '../src/types/userType';
 
 passport.serializeUser((user: Express.User, done) => {

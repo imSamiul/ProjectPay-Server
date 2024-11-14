@@ -1,10 +1,13 @@
 import express from 'express';
-import { addUserOtherInfo, getUserDetails } from '../controller/userController';
+import {
+  addUserOtherInfo,
+  getUserDetails,
+} from '../controllers/userController';
 
 import {
   ensureAuthenticated,
   ensureUserExists,
-} from '../middleware/passport-auth';
+} from '../middlewares/passport-auth';
 
 const router = express.Router();
 

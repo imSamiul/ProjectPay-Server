@@ -1,8 +1,8 @@
 import { Request, Response } from 'express';
-import Client from '../model/client.model';
+import Client from '../models/client.model';
 import { UserType } from '../types/userType';
-import ProjectManager from '../model/manager.model';
-import User from '../model/user.model';
+import ProjectManager from '../models/manager.model';
+import User from '../models/user.model';
 
 // GET: Get all clients
 export async function getClientList(req: Request, res: Response) {

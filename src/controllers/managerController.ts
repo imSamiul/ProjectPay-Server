@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import Project from '../model/project.model';
+import Project from '../models/project.model';
 import { UserType } from '../types/userType';
 
 // GET:

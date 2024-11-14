@@ -1,6 +1,6 @@
 import express from 'express';
-import { getManagerProjects } from '../controller/managerController';
-import auth from '../middleware/auth';
+import { getManagerProjects } from '../controllers/managerController';
+import auth from '../middlewares/auth';
 const router = express.Router();
 
 // GET:

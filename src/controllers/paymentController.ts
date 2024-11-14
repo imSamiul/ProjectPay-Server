@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
-import Project from '../model/project.model';
-import Payment from '../model/payment.model';
+import Project from '../models/project.model';
+import Payment from '../models/payment.model';
 import { PaymentType } from '../types/paymentType';
 
 // GET:
