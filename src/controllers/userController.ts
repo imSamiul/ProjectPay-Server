@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
-import Client from '../models/client.model';
+
 import { UserType } from '../types/userType';
+import Client from '../models/client.model';
 import ProjectManager from '../models/manager.model';
 import User from '../models/user.model';
 
@@ -37,33 +38,6 @@ export async function getUserDetails(req: Request, res: Response) {
     console.log(error);
   }
 }
-
-// POST: Logout User
-// export async function logOutUser(req: Request, res: Response) {
-//   try {
-//     const user = req.user as UserType;
-//     const checkIfTokenExists = user.tokens.find((token) => {
-//       return token.token === req.token;
-//     });
-//     if (!checkIfTokenExists) {
-//       throw new Error('Token does not exist');
-//     }
-
-//     user.tokens = user.tokens.filter((token) => {
-//       return token.token !== req.token;
-//     });
-//     await user.save();
-//     res.status(200).json('Logged out successfully');
-//   } catch (error) {
-//     let errorMessage = 'Failed to do something exceptional';
-//     if (error instanceof Error) {
-//       errorMessage = error.message;
-//     }
-
-//     res.status(500).json({ message: errorMessage });
-//     console.log(error);
-//   }
-// }
 
 // POST: Add user other info
 export async function addUserOtherInfo(req: Request, res: Response) {

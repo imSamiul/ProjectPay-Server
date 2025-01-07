@@ -5,10 +5,12 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "build": "npx tsc",
-    "start": "node dist/index.js",
-    "dev": "SET NODE_ENV=development & nodemon src/index.ts",
-    "prod": "SET NODE_ENV=production & node app.js"
+    "build": "rimraf dist && tsc",
+    "start-prod": "cross-env NODE_ENV=production PORT=4000 node ./dist/index.js",
+    "start": "cross-env NODE_ENV=development PORT=3000 ts-node-dev --respawn --transpile-only ./src/index.ts",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "add-build": "git add dist"
   },
   "dependencies": {
     "@types/uuid": "^10.0.0",
@@ -43,9 +45,11 @@
     "@types/passport-google-oauth20": "^2.0.16",
     "@types/passport-local": "^1.0.38",
     "@types/validator": "^13.12.2",
+    "cross-env": "^7.0.3",
     "eslint": "^9.11.0",
     "nodemon": "^3.1.5",
     "prettier": "^3.3.3",
+    "ts-node-dev": "^2.0.0",
     "typescript-eslint": "^8.6.0"
   },
   "packageManager": "pnpm@9.12.3+sha512.cce0f9de9c5a7c95bef944169cc5dfe8741abfb145078c0d508b868056848a87c81e626246cb60967cbd7fd29a6c062ef73ff840d96b3c86c40ac92cf4a813ee"

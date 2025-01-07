@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
-import Project from '../models/project.model';
 import { UserType } from '../types/userType';
+import Project from '../models/project.model';
 
 // GET:
 // get all projects for manager

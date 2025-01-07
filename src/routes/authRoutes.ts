@@ -8,6 +8,7 @@ import {
 } from '../controllers/authController';
 
 import { ensureAuthenticated } from '../middlewares/passport-auth';
+import { UserType } from '../types/userType';
 
 const router = express.Router();
 
@@ -24,13 +25,23 @@ router.post('/logout', ensureAuthenticated, handleLogout);
 router.get(
   '/login',
   passport.authenticate('google', {
-    scope: ['profile', 'email'],
+    scope: ['profile'],
   })
 );
 
 // callback route for google to redirect to
-router.get('/google/redirect', passport.authenticate('google'), (req, res) => {
-  res.redirect('http://localhost:5173/');
-});
+router.get(
+  '/google/redirect',
+  passport.authenticate('google', { session: false }),
+  (req, res) => {
+    const user = req.user as UserType;
+    if (!user.role) {
+      return res.redirect(
+        `${process.env.FRONTEND_UR}/addOtherInfo?email=${user.email}`
+      );
+    }
+    return res.redirect(`${process.env.FRONTEND_URL}`);
+  }
+);
 
 export default router;

@@ -1,9 +1,10 @@
 import { NextFunction, Request, Response } from 'express';
 
 import { SignUpFormType, UserInstanceType } from '../types/userType';
-import User from '../models/user.model';
+
 import passport from 'passport';
 import jwt from 'jsonwebtoken';
+import User from '../models/user.model';
 
 // POST: Create a user using form
 export async function createUserUsingForm(req: Request, res: Response) {

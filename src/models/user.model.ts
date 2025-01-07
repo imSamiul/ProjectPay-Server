@@ -1,7 +1,6 @@
 import mongoose from 'mongoose';
 import validator from 'validator';
 import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
 
 import { UserType, UserMethodsType, UserModelType } from '../types/userType';
 
@@ -12,16 +11,9 @@ const userSchema = new mongoose.Schema<
   UserMethodsType
 >(
   {
-    name: {
+    userName: {
       type: String,
-      required: true,
       trim: true,
-    },
-    googleId: {
-      type: String,
-    },
-    photo: {
-      type: String,
     },
     email: {
       type: String,
@@ -35,7 +27,6 @@ const userSchema = new mongoose.Schema<
         }
       },
     },
-
     password: {
       type: String,
       minlength: 6,
@@ -49,6 +40,13 @@ const userSchema = new mongoose.Schema<
     role: {
       type: String,
       enum: ['admin', 'client', 'project_manager'],
+    },
+    googleId: {
+      type: String,
+    },
+    avatar: {
+      type: String,
+      data: String,
     },
   },
   {
@@ -65,43 +63,6 @@ userSchema.pre('save', async function hashPassword(next) {
 
   next();
 });
-userSchema.methods.generateAuthToken = async function generateAuthToken() {
-  // ... rest of your logic to generate and store the token (uncommented)
-  const secretKey = process.env.JWT_TOKEN;
-  if (!secretKey) {
-    throw new Error('Secret key is not provided');
-  }
-  const token = jwt.sign({ id: this.id.toString() }, secretKey, {
-    expiresIn: '7d',
-  });
-
-  return token;
-};
-
-userSchema.methods.toJSON = function toJSON() {
-  const userObject: Partial<UserType> = this.toObject();
-
-  delete userObject.password;
-
-  return userObject;
-};
-
-// Static method to find user by credentials
-userSchema.statics.findByCredentials = async function (
-  email: string,
-  password: string
-) {
-  const foundUser = await this.findOne({ email });
-  if (!foundUser) {
-    throw new Error('Incorrect credentials');
-  }
-  const isMatch = await bcrypt.compare(password, foundUser.password);
-  if (!isMatch) {
-    throw new Error('Incorrect credentials');
-  }
-
-  return foundUser;
-};
 
 // Create the base model
 const User = mongoose.model<UserType, UserModelType>('User', userSchema);

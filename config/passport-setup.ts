@@ -1,53 +1,64 @@
-import passport from 'passport';
+import passport, { Profile } from 'passport';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 import { Strategy as LocalStrategy } from 'passport-local';
 import User from '../src/models/user.model';
 import { UserType } from '../src/types/userType';
 
-passport.serializeUser((user: Express.User, done) => {
+passport.serializeUser((user, done) => {
   done(null, (user as UserType)._id);
 });
 
 passport.deserializeUser(async (id, done) => {
-  const user = await User.findById(id);
-  done(null, user);
+  try {
+    const user = await User.findById(id); // Fetch user from database
+    done(null, user);
+  } catch (err) {
+    done(err, null);
+  }
 });
-
+// google strategy
 passport.use(
   new GoogleStrategy(
     {
       // options for the google strategy
-      callbackURL: '/auth/google/redirect',
-      clientID: process.env.GOOGLE_CLIENT_ID || '',
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET || '',
+      callbackURL: '/api/auth/google/redirect',
+      clientID: process.env.GOOGLE_CLIENT_ID as string,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
     },
     async (
       accessToken: string,
       refreshToken: string,
-      profile,
-      done: (err: Error | null, user?: UserType) => void
+      profile: Profile,
+      done
     ) => {
       // passport callback function
       // check if user already exists in our db
-      const existingUser = await User.findOne({ googleId: profile.id });
-      if (existingUser) {
-        done(null, existingUser);
-        return;
-      }
-      // if not, create user in our db
-      const newUser = new User({
-        name: profile.displayName,
-        googleId: profile.id,
-        email: profile.emails ? profile.emails[0].value : '',
-        photo: profile.photos ? profile.photos[0].value : '',
-      });
+      console.log(profile);
 
-      const savedUser = await newUser.save();
-      if (savedUser) {
-        console.log('new user created: ', newUser);
-        done(null, newUser);
-      } else {
-        done(new Error('User could not be saved'));
+      try {
+        if (!profile.emails || profile.emails.length === 0) {
+          return done(
+            new Error('No email found in the Google profile'),
+            undefined
+          );
+        }
+
+        // Extract the email
+        const email = profile.emails[0]?.value;
+
+        const existingUser = await User.findOne({ googleId: profile.id });
+        if (!existingUser) {
+          const newUser = new User({
+            googleId: profile.id,
+            email: email,
+            userName: profile.displayName,
+          });
+          await newUser.save();
+          return done(null, newUser);
+        }
+        return done(null, existingUser);
+      } catch (error) {
+        return done(error, undefined);
       }
     }
   )

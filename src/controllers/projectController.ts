@@ -1,11 +1,13 @@
 import { Request, Response } from 'express';
-import Project from '../models/project.model';
-import ProjectManager from '../models/manager.model';
+
 import { generateUUID } from '../utils/uuidGenerator';
 import Fuse from 'fuse.js';
 import { ProjectType } from '../types/projectDocumentType';
-import Payment from '../models/payment.model';
+
 import { UserType } from '../types/userType';
+import Project from '../models/project.model';
+import ProjectManager from '../models/manager.model';
+import Payment from '../models/payment.model';
 
 // Helper function to extract allowed updates
 const extractAllowedUpdates = (body: Partial<ProjectType>) => {

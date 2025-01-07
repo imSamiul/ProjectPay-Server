@@ -1,14 +1,17 @@
 import mongoose, { Document, HydratedDocument, Model } from 'mongoose';
 
 export type UserType = Document & {
-  _id?: mongoose.Types.ObjectId;
-  name: string;
-  googleId: string;
-  photo?: string;
+  _id: mongoose.Types.ObjectId;
+  userName: string;
   email: string;
+  userId: string;
   password: string;
-  role?: 'client' | 'admin' | 'project_manager';
-  tokens: { token: string }[];
+  role: 'client' | 'admin' | 'project_manager';
+  googleId: string;
+  avatar: {
+    data: string;
+    type: string;
+  };
 };
 
 export type SignUpFormType = {
