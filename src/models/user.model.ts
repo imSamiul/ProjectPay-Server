@@ -37,9 +37,8 @@ const userSchema = new mongoose.Schema<
         }
       },
     },
-    role: {
-      type: String,
-      enum: ['admin', 'client', 'project_manager'],
+    roles: {
+      type: [String],
     },
     googleId: {
       type: String,
@@ -51,14 +50,13 @@ const userSchema = new mongoose.Schema<
   },
   {
     timestamps: true,
-    discriminatorKey: 'role',
   }
 );
 
 userSchema.pre('save', async function hashPassword(next) {
   // this gives to individual UserType that i will save
   if (this.isModified('password')) {
-    this.password = await bcrypt.hash(this.password, 8);
+    this.password = await bcrypt.hash(this.password, 10);
   }
 
   next();

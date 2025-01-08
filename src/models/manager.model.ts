@@ -7,11 +7,8 @@ const managerSchema = new mongoose.Schema<ManagerType>(
     userId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
-      // TODO: Add required: true
     },
-    managerPhone: {
-      type: String,
-    },
+
     managerProjects: [
       {
         type: mongoose.Schema.Types.ObjectId,

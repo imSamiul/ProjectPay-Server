@@ -1,6 +1,6 @@
 import passport, { Profile } from 'passport';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
-import { Strategy as LocalStrategy } from 'passport-local';
+
 import User from '../src/models/user.model';
 import { UserType } from '../src/types/userType';
 
@@ -62,26 +62,4 @@ passport.use(
       }
     }
   )
-);
-
-passport.use(
-  new LocalStrategy({ usernameField: 'email' }, async function (
-    email,
-    password,
-    done
-  ) {
-    try {
-      const user = await User.findOne({ email: email });
-      if (!user) {
-        return done(null, false, { message: 'User not found' });
-      }
-      const loginSuccessful = await User.findByCredentials(email, password);
-      if (!loginSuccessful) {
-        return done(null, false, { message: 'Incorrect credentials' });
-      }
-      return done(null, user);
-    } catch (error) {
-      return done(error);
-    }
-  })
 );

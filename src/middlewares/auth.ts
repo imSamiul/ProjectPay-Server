@@ -1,11 +1,11 @@
-// TODO: will delete auth.ts
-
 import jwt from 'jsonwebtoken';
 import { Request, Response, NextFunction } from 'express';
-import User from '../models/user.model';
 
 type JwtPayload = {
-  id: string;
+  UserInfo: {
+    id: string;
+    roles: string[];
+  };
 };
 
 const auth = async (req: Request, res: Response, next: NextFunction) => {
@@ -13,7 +13,7 @@ const auth = async (req: Request, res: Response, next: NextFunction) => {
     const authHeader = req.header('Authorization');
 
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      throw new Error('Authentication token is missing or invalid');
+      throw new Error('Authentication token is missing');
     }
 
     const token = authHeader.replace('Bearer ', '').trim();
@@ -21,30 +21,24 @@ const auth = async (req: Request, res: Response, next: NextFunction) => {
     if (!token) {
       throw new Error('Authentication token is missing');
     }
-    const jwtSecret = process.env.JWT_TOKEN;
-    if (!jwtSecret) {
-      throw new Error('JWT secret is missing in environment variables');
-    }
+    const jwtSecret = process.env.JWT_SECRET as string;
 
-    const { id } = jwt.verify(token, jwtSecret) as JwtPayload;
+    jwt.verify(token, jwtSecret, (err, decode) => {
+      if (err || !decode) {
+        throw new Error('Authentication token is invalid');
+      }
 
-    const user = await User.findOne({ _id: id, 'tokens.token': token });
-    if (!user) {
-      throw new Error('User not found');
-    }
-    req.token = token;
-    req.user = user;
-    next();
+      req.user = (decode as JwtPayload).UserInfo.id;
+      req.roles = (decode as JwtPayload).UserInfo.roles;
+
+      next();
+    });
   } catch (error) {
+    let errorMessage = 'Failed to do something exceptional';
     if (error instanceof Error) {
-      console.log(error.message); // Log the error message
-      res.status(401).json({ message: error.message });
-    } else {
-      console.log('An unexpected error occurred', error);
-      res
-        .status(401)
-        .json({ message: 'Not authorized to access this resource' });
+      errorMessage = error.message;
     }
+    res.status(403).json({ message: errorMessage });
   }
 };
 export default auth;

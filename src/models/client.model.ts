@@ -8,9 +8,7 @@ const clientSchema = new mongoose.Schema<ClientType>(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
     },
-    clientPhone: {
-      type: String,
-    },
+
     // Specific fields for the client
     clientProjects: [
       {

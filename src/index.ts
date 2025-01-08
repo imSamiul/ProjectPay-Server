@@ -11,6 +11,7 @@ import connectDB from './db/mongoose';
 import session from 'express-session';
 import MongoStore from 'connect-mongo';
 import passport from 'passport';
+import cookieParser from 'cookie-parser';
 
 // Load environment variables based on the current environment
 
@@ -59,6 +60,7 @@ app.use(
 );
 app.use(passport.initialize());
 app.use(passport.session());
+app.use(cookieParser());
 
 // Routes
 app.get('/', (req, res) => {

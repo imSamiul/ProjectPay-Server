@@ -4,9 +4,8 @@ export type UserType = Document & {
   _id: mongoose.Types.ObjectId;
   userName: string;
   email: string;
-  userId: string;
   password: string;
-  role: 'client' | 'admin' | 'project_manager';
+  roles: string[];
   googleId: string;
   avatar: {
     data: string;

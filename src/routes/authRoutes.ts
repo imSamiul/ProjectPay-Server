@@ -5,43 +5,40 @@ import {
   createUserUsingForm,
   handleLogin,
   handleLogout,
+  handleRefreshToken,
 } from '../controllers/authController';
+import auth from '../middlewares/auth';
 
-import { ensureAuthenticated } from '../middlewares/passport-auth';
-import { UserType } from '../types/userType';
+// import { UserType } from '../types/userType';
 
 const router = express.Router();
 
-// signup route using form
 router.post('/signup', createUserUsingForm);
-// login route using form
-
 router.post('/login', handleLogin);
-
-// logout route
-router.post('/logout', ensureAuthenticated, handleLogout);
+router.post('/logout', auth, handleLogout);
+router.post('/refresh-token', handleRefreshToken);
 
 // login with OAuth route
 router.get(
-  '/login',
+  '/OAuthLogin',
   passport.authenticate('google', {
     scope: ['profile'],
   })
 );
 
 // callback route for google to redirect to
-router.get(
-  '/google/redirect',
-  passport.authenticate('google', { session: false }),
-  (req, res) => {
-    const user = req.user as UserType;
-    if (!user.role) {
-      return res.redirect(
-        `${process.env.FRONTEND_UR}/addOtherInfo?email=${user.email}`
-      );
-    }
-    return res.redirect(`${process.env.FRONTEND_URL}`);
-  }
-);
+// router.get(
+//   '/google/redirect',
+//   passport.authenticate('google', { session: false }),
+//   (req, res) => {
+//     const user = req.user as UserType;
+//     if (!user.role) {
+//       return res.redirect(
+//         `${process.env.FRONTEND_UR}/addOtherInfo?email=${user.email}`
+//       );
+//     }
+//     return res.redirect(`${process.env.FRONTEND_URL}`);
+//   }
+// );
 
 export default router;
