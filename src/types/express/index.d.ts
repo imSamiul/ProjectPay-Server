@@ -4,7 +4,7 @@ declare global {
   namespace Express {
     interface Request {
       user?: UserType; // The custom property 'user'
-      roles?: string[];
+      token?: string; // The custom property 'token'
     }
   }
 }

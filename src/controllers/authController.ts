@@ -1,24 +1,29 @@
-import { Request, Response } from 'express';
-
+import { NextFunction, Request, Response } from 'express';
 import User from '../models/user.model';
-import {
-  generateAccessToken,
-  generateRefreshToken,
-  verifyToken,
-} from '../utils/token';
+import ms from 'ms';
 import bcrypt from 'bcrypt';
 import ProjectManager from '../models/manager.model';
+import Token from '../models/token.model';
+import { clearTokens, generateJWT, verifyToken } from '../utils/auth';
+import { UserType } from '../types/userType';
 
 // POST: Create a user using form
-export async function createUserUsingForm(req: Request, res: Response) {
+export async function handleSignUp(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
   const { name, email, password, role } = req.body;
+  if (!name || !email || !password || !role) {
+    return res.status(422).json({ message: 'Please fill all the fields' });
+  }
 
   try {
     const existingUser = await User.findOne({ email });
 
     if (existingUser) {
       return res
-        .status(400)
+        .status(422)
         .json({ message: 'User already exist with this email' });
     }
 
@@ -26,8 +31,8 @@ export async function createUserUsingForm(req: Request, res: Response) {
       userName: name,
       email,
       password,
-      roles: [...role],
-    });
+      role,
+    } as UserType);
     await newUser.save();
     if (role === 'project_manager') {
       const existingProjectManager = await ProjectManager.findOne({
@@ -44,31 +49,23 @@ export async function createUserUsingForm(req: Request, res: Response) {
       await newProjectManager.save();
     }
     // TODO: another if statement for client
-
-    const accessToken = generateAccessToken(newUser);
-    const refreshToken = generateRefreshToken(newUser);
-
-    res.cookie('refreshToken', refreshToken, {
-      httpOnly: true,
-      secure: true,
-      sameSite: 'none',
-      maxAge: 1000 * 60 * 60 * 24 * 7,
-    });
-    res.status(201).json({ user: newUser, accessToken });
+    req.user = newUser;
+    return next();
   } catch (error) {
-    let errorMessage = 'Failed to do something exceptional';
-    if (error instanceof Error) {
-      errorMessage = error.message;
-    }
-
-    res.status(500).json({ message: errorMessage });
+    return next(error);
   }
 }
 
 // POST: Login User using form
-export async function handleLogin(req: Request, res: Response) {
+export async function handleLogin(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
   const { email, password } = req.body;
-  console.log(email, password);
+  if (!email || !password) {
+    return res.status(422).json({ message: 'Please fill all the fields' });
+  }
 
   try {
     const user = await User.findOne({ email });
@@ -77,62 +74,73 @@ export async function handleLogin(req: Request, res: Response) {
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
-    console.log(isPasswordValid);
+
     if (!isPasswordValid) {
       return res.status(400).json({ message: 'Invalid credentials' });
     }
+    req.user = user;
 
-    const accessToken = generateAccessToken(user);
-    const refreshToken = generateRefreshToken(user);
+    return next();
+  } catch (error) {
+    return next(error);
+  }
+}
 
-    res.cookie('refreshToken', refreshToken, {
-      httpOnly: true,
-      secure: true,
-      sameSite: 'none',
-      maxAge: 1000 * 60 * 60 * 24 * 7,
-    });
-    res.status(200).json({ accessToken });
+// POST: Logout user
+export async function handleLogout(req: Request, res: Response) {
+  try {
+    await clearTokens(req, res);
+    if (!res.headersSent) {
+      return res.status(200).json({ message: 'Logged out successfully' });
+    }
   } catch (error) {
     let errorMessage = 'Failed to do something exceptional';
     if (error instanceof Error) {
       errorMessage = error.message;
     }
 
-    res.status(500).json({ message: errorMessage });
+    res.status(403).json({ message: errorMessage });
   }
 }
-
-// POST: Logout user
-export async function handleLogout(req: Request, res: Response) {
-  res.clearCookie('refreshToken', {
-    httpOnly: true,
-    secure: true,
-    sameSite: 'strict',
-  });
-  res.status(200).json({ message: 'Logged out successfully' });
-}
-
 // POST: Refresh token and fetch a new access token
-export async function handleRefreshToken(req: Request, res: Response) {
-  const refreshToken = req.cookies.refreshToken;
+export async function handleRefreshAccessToken(req: Request, res: Response) {
+  const { REFRESH_TOKEN_SECRET, ACCESS_TOKEN_SECRET, ACCESS_TOKEN_LIFE } =
+    process.env;
+
+  const { signedCookies } = req;
+  const { refreshToken } = signedCookies;
 
   if (!refreshToken) {
-    return res.status(403).json({ message: 'Refresh token not found' });
+    return res.status(204).json({ message: 'Refresh token not found' });
   }
 
   try {
-    const refreshTokenSecret = process.env.REFRESH_TOKEN_SECRET as string;
-    const id = verifyToken(refreshToken, refreshTokenSecret);
-    const user = await User.findById({ _id: id });
-    if (!user) {
-      return res.status(403).json({ message: 'User not found' });
-    }
-    const newAccessToken = generateAccessToken({
-      _id: user._id,
-      roles: user.roles,
+    const refreshTokenInDb = await Token.findOne({
+      refreshToken,
     });
 
-    res.status(200).json({ accessToken: newAccessToken });
+    if (!refreshTokenInDb) {
+      await clearTokens(req, res);
+      throw new Error('Token not found in database');
+    }
+
+    const id = verifyToken(refreshToken, REFRESH_TOKEN_SECRET as string);
+    const user = await User.findById({ _id: id });
+    if (!user) {
+      await clearTokens(req, res);
+      throw new Error('User not found');
+    }
+    const newAccessToken = generateJWT(
+      user._id,
+      ACCESS_TOKEN_SECRET as string,
+      ACCESS_TOKEN_LIFE as string
+    );
+
+    res.status(200).json({
+      user,
+      token: newAccessToken,
+      expiresAt: new Date(Date.now() + ms(ACCESS_TOKEN_LIFE as string)),
+    });
   } catch (error) {
     let errorMessage = 'Failed to do something exceptional';
     if (error instanceof Error) {

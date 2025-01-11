@@ -7,30 +7,35 @@ import {
   updateProjectDetails,
   updateProjectStatus,
 } from '../controllers/projectController';
-import auth from '../middlewares/auth';
+import { isAuthenticated } from '../middlewares/isAuthenticated';
+
 const router = express.Router();
 
 // GET:
-router.get('/projects/search', auth, searchProject);
-router.get('/projects/details/:projectCode', auth, getProjectDetails);
+router.get('/projects/search', isAuthenticated, searchProject);
+router.get(
+  '/projects/details/:projectCode',
+  isAuthenticated,
+  getProjectDetails
+);
 
 // POST:
 // create a new project
-router.post('/projects/create', auth, createNewProject);
+router.post('/projects/create', isAuthenticated, createNewProject);
 
 // PATCH:
 router.patch(
   '/projects/updateProjectStatus/:projectCode',
-  auth,
+  isAuthenticated,
   updateProjectStatus
 );
 router.patch(
   '/projects/updateProjectDetails/:projectCode',
-  auth,
+  isAuthenticated,
   updateProjectDetails
 );
 
 // DELETE:
-router.delete('/projects/delete/:projectId', auth, deleteProject);
+router.delete('/projects/delete/:projectId', isAuthenticated, deleteProject);
 
 export default router;

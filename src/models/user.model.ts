@@ -37,8 +37,8 @@ const userSchema = new mongoose.Schema<
         }
       },
     },
-    roles: {
-      type: [String],
+    role: {
+      type: String,
     },
     googleId: {
       type: String,

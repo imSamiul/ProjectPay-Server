@@ -1,10 +1,11 @@
 import express from 'express';
 import { getManagerProjects } from '../controllers/managerController';
-import auth from '../middlewares/auth';
+import { isAuthenticated } from '../middlewares/isAuthenticated';
+
 const router = express.Router();
 
 // GET:
-router.get('/manager/projects', auth, getManagerProjects);
+router.get('/manager/projects', isAuthenticated, getManagerProjects);
 
 // POST:
 

@@ -1,22 +1,23 @@
 import express from 'express';
-import auth from '../middlewares/auth';
+
 import {
   addPayment,
   deletePayment,
   updatePayment,
 } from '../controllers/paymentController';
+import { isAuthenticated } from '../middlewares/isAuthenticated';
 const router = express.Router();
 
 // GET:
 
 // POST:
 // add payment for specific project and decrease the due amount
-router.post('/payment/add', auth, addPayment);
+router.post('/payment/add', isAuthenticated, addPayment);
 
 // PATCH:
-router.patch('/payment/update/:paymentId', auth, updatePayment);
+router.patch('/payment/update/:paymentId', isAuthenticated, updatePayment);
 
 // DELETE:
-router.delete('/payment/delete/:paymentId', auth, deletePayment);
+router.delete('/payment/delete/:paymentId', isAuthenticated, deletePayment);
 
 export default router;

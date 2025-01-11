@@ -2,21 +2,22 @@ import express from 'express';
 import passport from 'passport';
 
 import {
-  createUserUsingForm,
   handleLogin,
   handleLogout,
-  handleRefreshToken,
+  handleRefreshAccessToken,
+  handleSignUp,
 } from '../controllers/authController';
-import auth from '../middlewares/auth';
+import { generateAuthTokens } from '../middlewares/generateAuthTokens';
+import { isAuthenticated } from '../middlewares/isAuthenticated';
 
 // import { UserType } from '../types/userType';
 
 const router = express.Router();
 
-router.post('/signup', createUserUsingForm);
-router.post('/login', handleLogin);
-router.post('/logout', auth, handleLogout);
-router.post('/refresh-token', handleRefreshToken);
+router.post('/signup', handleSignUp, generateAuthTokens);
+router.post('/login', handleLogin, generateAuthTokens);
+router.post('/logout', isAuthenticated, handleLogout);
+router.get('/refresh-token', handleRefreshAccessToken);
 
 // login with OAuth route
 router.get(

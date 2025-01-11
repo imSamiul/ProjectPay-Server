@@ -2,10 +2,6 @@ import jwt from 'jsonwebtoken';
 import { UserType } from '../types/userType';
 import mongoose from 'mongoose';
 
-type JwtPayload = {
-  id: mongoose.Types.ObjectId;
-};
-
 export const generateAccessToken = (user: {
   _id: mongoose.Types.ObjectId;
   roles: string[];
@@ -25,9 +21,4 @@ export const generateRefreshToken = (user: UserType) => {
   return jwt.sign({ id: user._id }, jwtSecret, {
     expiresIn: '7d',
   });
-};
-
-export const verifyToken = (token: string, secret: string) => {
-  const { id } = jwt.verify(token, secret) as JwtPayload;
-  return id;
 };

@@ -5,7 +5,7 @@ export type UserType = Document & {
   userName: string;
   email: string;
   password: string;
-  roles: string[];
+  role: string;
   googleId: string;
   avatar: {
     data: string;
