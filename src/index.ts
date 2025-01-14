@@ -7,8 +7,8 @@ dotenv.config({ path: envFile });
 import express from 'express';
 import cors from 'cors';
 import userRoutes from './routes/user.routes';
-import projectRoutes from './routes/projectRoutes';
-import managerRoutes from './routes/managerRoutes';
+import projectRoutes from './routes/project.routes';
+import managerRoutes from './routes/manager.routes';
 import paymentRoutes from './routes/paymentRoutes';
 import authRoutes from './routes/auth.routes';
 import connectDB from './db/mongoose';
@@ -59,7 +59,7 @@ app.get('/', (req, res) => {
 
 app.use('/api', userRoutes);
 app.use(projectRoutes);
-app.use(managerRoutes);
+app.use('/api', managerRoutes);
 app.use(paymentRoutes);
 app.use('/api/auth', authRoutes);
 

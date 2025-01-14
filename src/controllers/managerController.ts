@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { UserType } from '../types/userType';
+
 import Project from '../models/project.model';
 
 // GET:
@@ -9,7 +9,7 @@ export async function getManagerProjects(req: Request, res: Response) {
   const pageNumber = Number(pageParam);
   const limitNumber = Number(limit);
   try {
-    const user = req.user as UserType;
+    const user = req.user;
     const projects = await Project.find({ projectManager: user?._id })
       .skip((pageNumber - 1) * limitNumber)
       .limit(limitNumber);

@@ -4,10 +4,10 @@ import { generateUUID } from '../utils/uuidGenerator';
 import Fuse from 'fuse.js';
 import { ProjectType } from '../types/projectDocumentType';
 
-import { UserType } from '../types/userType';
 import Project from '../models/project.model';
 import ProjectManager from '../models/manager.model';
 import Payment from '../models/payment.model';
+import { User } from '../types/userType';
 
 // Helper function to extract allowed updates
 const extractAllowedUpdates = (body: Partial<ProjectType>) => {
@@ -42,7 +42,7 @@ export async function searchProject(req: Request, res: Response) {
   }
 
   try {
-    const projectManagerId = (req.user as UserType)?._id;
+    const projectManagerId = (req.user as User)?._id;
     const projects = await Project.find({
       projectManager: projectManagerId,
     });
@@ -116,7 +116,7 @@ export async function createNewProject(req: Request, res: Response) {
       ...projectData,
       startDate,
       status,
-      projectManager: (req.user as UserType)?._id,
+      projectManager: (req.user as User)?._id,
     });
 
     const existingProject = await Project.findOne({ name: projectData.name });
@@ -130,7 +130,7 @@ export async function createNewProject(req: Request, res: Response) {
     if (savedProject) {
       await ProjectManager.findOneAndUpdate(
         {
-          _id: (req.user as UserType)?._id,
+          _id: (req.user as User)?._id,
           userType: 'project manager',
         },
         {

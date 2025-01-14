@@ -1,5 +1,5 @@
 import { Document, Types } from 'mongoose';
-export type ProjectType = Document & {
+export type Project = Document & {
   projectCode: string;
   name: string;
   budget: number;
