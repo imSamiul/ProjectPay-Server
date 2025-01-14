@@ -3,6 +3,7 @@ import { Request, Response } from 'express';
 import Client from '../models/client.model';
 
 import { User } from '../types/userType';
+import UserModel from '../models/user.model';
 
 // GET: Get all clients
 export async function getClientList(req: Request, res: Response) {
@@ -22,11 +23,14 @@ export async function getClientList(req: Request, res: Response) {
 // GET: Get the user details
 export async function getUserDetails(req: Request, res: Response) {
   try {
-    const user = req.user as User | null;
+    const user = req.user;
+
+    const findUser = await UserModel.findById((user as User)._id);
+
     if (!user) {
       return res.status(200).json({ user: null });
     }
-    res.status(200).json({ user });
+    res.status(200).json({ user: findUser });
   } catch (error) {
     let errorMessage = 'Failed to load the client list';
     if (error instanceof Error) {
