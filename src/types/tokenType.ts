@@ -1,7 +1,11 @@
-import mongoose from 'mongoose';
+import mongoose, { Model } from 'mongoose';
 
-export type TokenType = {
+export type TToken = {
   userId: mongoose.Types.ObjectId;
   refreshToken: string;
-  expirationTime: number;
+  expirationTime: Date;
 };
+
+export type TTokenMethods = object;
+
+export type TokenModel = Model<TToken, object, TTokenMethods>;

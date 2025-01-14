@@ -1,10 +1,14 @@
 import { NextFunction, Request, Response } from 'express';
-import Token from '../models/token.model';
-
-import { verifyToken } from '../utils/auth';
-import User from '../models/user.model';
+import jwt from 'jsonwebtoken';
 
 const { ACCESS_TOKEN_SECRET } = process.env;
+
+interface JwtPayload {
+  user: {
+    _id: string;
+    role: string;
+  };
+}
 
 export async function isAuthenticated(
   req: Request,
@@ -12,45 +16,41 @@ export async function isAuthenticated(
   next: NextFunction
 ) {
   try {
-    const authToken = req.get('Authorization');
-    const accessToken = authToken?.split('Bearer ')[1];
-    if (!accessToken) {
+    const authToken = req.get('x-auth-token');
+
+    if (!authToken) {
       throw new Error('No access token found');
     }
-
-    const { signedCookies = {} } = req;
-
-    const { refreshToken } = signedCookies;
-    if (!refreshToken) {
-      throw new Error('No refresh token found');
-    }
-
-    const refreshTokenInDB = await Token.findOne({ refreshToken });
-
-    if (!refreshTokenInDB) {
-      throw new Error('Refresh token not found in database');
-    }
-
-    let userId;
     try {
-      userId = verifyToken(accessToken, ACCESS_TOKEN_SECRET as string);
+      //if the incoming request has a valid token, we extract the payload from the token and attach it to the request object.
+      const payload = jwt.verify(
+        authToken,
+        ACCESS_TOKEN_SECRET as string
+      ) as JwtPayload;
+      req.user = payload.user;
+      next();
     } catch (error) {
-      let errorMessage = 'Failed to do something exceptional';
-      if (error instanceof Error) {
-        errorMessage = error.message;
+      // Explicitly assert the error as `Error` type
+      if (error instanceof jwt.TokenExpiredError) {
+        return res
+          .status(401)
+          .json({ error: 'Session timed out, please login again' });
+      } else if (error instanceof jwt.JsonWebTokenError) {
+        return res
+          .status(401)
+          .json({ error: 'Invalid token, please login again!' });
+      } else {
+        // Catch other unprecedented errors
+        console.error(error);
+        return res.status(400).json({ error: 'An unexpected error occurred' });
       }
-
-      res.status(403).json({ message: errorMessage });
     }
-
-    const user = User.findById({ _id: userId });
-    if (!user) {
-      throw new Error('User not found');
-    }
-
-    req.user = user;
-    return next();
   } catch (error) {
-    return next(error);
+    let errorMessage = 'Failed to do something exceptional';
+    if (error instanceof Error) {
+      errorMessage = error.message;
+    }
+
+    res.status(403).json({ message: errorMessage });
   }
 }

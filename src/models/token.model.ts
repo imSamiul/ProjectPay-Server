@@ -1,11 +1,13 @@
-import mongoose from 'mongoose';
-import { TokenType } from '../types/tokenType';
+import { model, Schema } from 'mongoose';
+import { TokenModel, TToken, TTokenMethods } from '../types/tokenType';
+import ms from 'ms';
 
 // Define base UserType schema
-const tokenSchema = new mongoose.Schema<TokenType>(
+const refreshTokenLife = process.env.REFRESH_TOKEN_LIFE ?? '7d';
+const tokenSchema = new Schema<TToken, TokenModel, TTokenMethods>(
   {
     userId: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: Schema.Types.ObjectId,
       required: true,
     },
     refreshToken: {
@@ -13,8 +15,8 @@ const tokenSchema = new mongoose.Schema<TokenType>(
       required: true,
     },
     expirationTime: {
-      type: Number,
-      required: true,
+      type: Date,
+      expires: ms(refreshTokenLife) / 1000,
     },
   },
   {
@@ -23,6 +25,6 @@ const tokenSchema = new mongoose.Schema<TokenType>(
 );
 
 // Create the base model
-const Token = mongoose.model<TokenType>('Token', tokenSchema);
+const Token = model<TToken, TokenModel>('Token', tokenSchema);
 
 export default Token;

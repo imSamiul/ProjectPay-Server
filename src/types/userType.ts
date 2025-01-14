@@ -1,6 +1,6 @@
-import mongoose, { Document, HydratedDocument, Model } from 'mongoose';
+import mongoose, { Document, Model } from 'mongoose';
 
-export type UserType = Document & {
+export type User = Document & {
   _id: mongoose.Types.ObjectId;
   userName: string;
   email: string;
@@ -13,22 +13,15 @@ export type UserType = Document & {
   };
 };
 
-export type SignUpFormType = {
+export type SignupCredentials = {
   name: string;
   email: string;
   password: string;
 };
 
-export type UserMethodsType = UserType & {
-  generateAuthToken(): Promise<string>;
-  toJSON: () => object;
+export type UserMethods = {
+  createAccessToken(): Promise<string>;
+  createRefreshToken(): Promise<string>;
 };
 
-export type UserInstanceType = HydratedDocument<UserType> & UserMethodsType;
-
-export type UserModelType = Model<UserType, object, UserMethodsType> & {
-  findByCredentials(
-    email: string,
-    password: string
-  ): Promise<HydratedDocument<UserType & UserMethodsType>>;
-};
+export type UserModel = Model<User, object, UserMethods>;

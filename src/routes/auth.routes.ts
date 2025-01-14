@@ -1,23 +1,30 @@
 import express from 'express';
 import passport from 'passport';
-
 import {
+  generateRefreshToken,
   handleLogin,
   handleLogout,
-  handleRefreshAccessToken,
   handleSignUp,
-} from '../controllers/authController';
-import { generateAuthTokens } from '../middlewares/generateAuthTokens';
+} from '../controllers/auth.controller';
 import { isAuthenticated } from '../middlewares/isAuthenticated';
 
 // import { UserType } from '../types/userType';
 
 const router = express.Router();
 
-router.post('/signup', handleSignUp, generateAuthTokens);
-router.post('/login', handleLogin, generateAuthTokens);
-router.post('/logout', isAuthenticated, handleLogout);
-router.get('/refresh-token', handleRefreshAccessToken);
+//@route POST /api/auth/signup
+router.post('/signup', handleSignUp);
+//@route POST /api/auth/login
+router.post('/login', handleLogin);
+//@route POST /api/auth/refresh_token
+router.post('/refresh-token', generateRefreshToken);
+//@route DELETE /api/auth/logout
+router.post('/logout', handleLogout);
+//@route GET /api/protected_resource
+//@access to only authenticated users
+router.get('/users/me', isAuthenticated, (req, res) => {
+  return res.status(200).json({ user: req.user });
+});
 
 // login with OAuth route
 router.get(
