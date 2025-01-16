@@ -1,7 +1,11 @@
 import mongoose from 'mongoose';
-import { ProjectType } from '../types/projectDocumentType';
+import { Project, ProjectMethods, ProjectModel } from '../types/project.type';
 
-const projectSchema = new mongoose.Schema<ProjectType>(
+const projectSchema = new mongoose.Schema<
+  Project,
+  ProjectModel,
+  ProjectMethods
+>(
   {
     projectCode: {
       type: String,
@@ -118,8 +122,6 @@ projectSchema.path('due').validate(function (value: number) {
 }, 'Due must be a positive number and less than or equal to the budget');
 
 projectSchema.path('totalPaid').validate(function (value: number) {
-  console.log(this.get('budget'), this.get('advance'), value);
-
   return (
     value >= 0 &&
     value <= this.get('budget') &&
@@ -153,6 +155,9 @@ projectSchema.methods.reCalculateAll = async function () {
   return this;
 };
 
-const Project = mongoose.model<ProjectType>('Project', projectSchema);
+const ProjectModel = mongoose.model<Project, ProjectModel>(
+  'Project',
+  projectSchema
+);
 
-export default Project;
+export default ProjectModel;

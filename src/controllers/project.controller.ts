@@ -2,12 +2,12 @@ import { Request, Response } from 'express';
 
 import { generateUUID } from '../utils/uuidGenerator';
 import Fuse from 'fuse.js';
-import { ProjectType } from '../types/projectDocumentType';
+import { ProjectType } from '../types/project.type';
 
 import Project from '../models/project.model';
 import ProjectManager from '../models/manager.model';
 import Payment from '../models/payment.model';
-import { User } from '../types/userType';
+import { User } from '../types/user.type';
 
 // Helper function to extract allowed updates
 const extractAllowedUpdates = (body: Partial<ProjectType>) => {
@@ -93,7 +93,6 @@ export async function getProjectDetails(req: Request, res: Response) {
     res.status(500).json({
       message: errorMessage,
     });
-    console.log(error);
   }
 }
 
@@ -148,7 +147,6 @@ export async function createNewProject(req: Request, res: Response) {
     res.status(500).json({
       message: errorMessage,
     });
-    console.log(error);
   }
 }
 

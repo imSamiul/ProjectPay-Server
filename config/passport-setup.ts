@@ -2,7 +2,7 @@ import passport, { Profile } from 'passport';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 
 import User from '../src/models/user.model';
-import { UserType } from '../src/types/userType';
+import { UserType } from '../src/types/user.type';
 
 passport.serializeUser((user, done) => {
   done(null, (user as UserType)._id);

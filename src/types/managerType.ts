@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { UserType } from './userType';
+import { UserType } from './user.type';
 
 export type ManagerType = UserType & {
   userId: mongoose.Types.ObjectId;

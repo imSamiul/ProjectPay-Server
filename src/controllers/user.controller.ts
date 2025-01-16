@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 
 import Client from '../models/client.model';
 
-import { User } from '../types/userType';
+import { User } from '../types/user.type';
 import UserModel from '../models/user.model';
 
 // GET: Get all clients

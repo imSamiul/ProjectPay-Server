@@ -6,7 +6,7 @@ import Token from '../models/token.model';
 
 import jwt from 'jsonwebtoken';
 import ms from 'ms';
-import { User } from '../types/userType';
+import { User } from '../types/user.type';
 import UserModel from '../models/user.model';
 
 // POST: Create a user using form

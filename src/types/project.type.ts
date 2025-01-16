@@ -1,5 +1,6 @@
-import { Document, Types } from 'mongoose';
+import { Document, Model, Types } from 'mongoose';
 export type Project = Document & {
+  _id: Types.ObjectId;
   projectCode: string;
   name: string;
   budget: number;
@@ -20,5 +21,10 @@ export type Project = Document & {
   verifiedClientList: Types.ObjectId[];
   projectManager: Types.ObjectId;
   paymentList: Types.ObjectId[];
-  reCalculateAll: () => Promise<void>;
 };
+
+export type ProjectMethods = {
+  recalculateAll: () => Promise<void>;
+};
+
+export type ProjectModel = Model<Project, object, ProjectMethods>;

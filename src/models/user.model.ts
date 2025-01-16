@@ -5,7 +5,7 @@ import jwt from 'jsonwebtoken';
 const { ACCESS_TOKEN_SECRET, REFRESH_TOKEN_SECRET } = process.env;
 
 import Token from './token.model';
-import { User, UserMethods, UserModel } from '../types/userType';
+import { User, UserMethods, UserModel } from '../types/user.type';
 import { TToken } from '../types/tokenType';
 import ms from 'ms';
 
