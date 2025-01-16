@@ -58,7 +58,7 @@ app.get('/', (req, res) => {
 });
 
 app.use('/api', userRoutes);
-app.use(projectRoutes);
+app.use('/api', projectRoutes);
 app.use('/api', managerRoutes);
 app.use(paymentRoutes);
 app.use('/api/auth', authRoutes);

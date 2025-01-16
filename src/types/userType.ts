@@ -14,9 +14,10 @@ export type User = Document & {
 };
 
 export type SignupCredentials = {
-  name: string;
+  userName: string;
   email: string;
   password: string;
+  role: string;
 };
 
 export type UserMethods = {

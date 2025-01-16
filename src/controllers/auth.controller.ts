@@ -11,8 +11,8 @@ import UserModel from '../models/user.model';
 
 // POST: Create a user using form
 export async function handleSignUp(req: Request, res: Response) {
-  const { name, email, password, role } = req.body;
-  if (!name || !email || !password || !role) {
+  const { userName, email, password, role } = req.body;
+  if (!userName || !email || !password || !role) {
     return res.status(422).json({ message: 'Please fill all the fields' });
   }
 
@@ -24,7 +24,7 @@ export async function handleSignUp(req: Request, res: Response) {
     } else {
       //create new user and generate a pair of tokens and send
       const newUser = new UserModel({
-        userName: name,
+        userName,
         email,
         password,
         role,
@@ -201,7 +201,6 @@ export async function generateRefreshToken(req: Request, res: Response) {
     if (error instanceof Error) {
       errorMessage = error.message;
     }
-    console.log('Error refreshing token:', errorMessage);
 
     res.status(403).json({ message: errorMessage });
   }

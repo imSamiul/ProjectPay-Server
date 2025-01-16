@@ -6,7 +6,7 @@ import {
   searchProject,
   updateProjectDetails,
   updateProjectStatus,
-} from '../controllers/projectController';
+} from '../controllers/project.controller';
 import { isAuthenticated } from '../middlewares/isAuthenticated';
 
 const router = express.Router();
