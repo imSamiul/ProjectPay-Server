@@ -4,7 +4,7 @@ import {
   addPayment,
   deletePayment,
   updatePayment,
-} from '../controllers/paymentController';
+} from '../controllers/payment.controller';
 import { isAuthenticated } from '../middlewares/isAuthenticated';
 const router = express.Router();
 

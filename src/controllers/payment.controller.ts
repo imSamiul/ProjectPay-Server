@@ -1,8 +1,9 @@
 import { Request, Response } from 'express';
 
-import { PaymentType } from '../types/paymentType';
 import Project from '../models/project.model';
-import Payment from '../models/payment.model';
+
+import { Payment } from '../types/payment.type';
+import PaymentModel from '../models/payment.model';
 
 // GET:
 
@@ -22,30 +23,36 @@ export async function addPayment(req: Request, res: Response) {
     if (!project) {
       return res.status(404).send({ error: 'Project not found' });
     }
-
-    const payment = new Payment<PaymentType>({
-      paymentAmount,
-      paymentMethod,
-      transactionId,
-      paymentDate,
-      projectId: projectId,
-    });
-    await payment.save();
     if (project.due < paymentAmount) {
       return res
         .status(400)
         .send({ error: 'Payment amount exceeds due amount' });
     }
 
-    project.due -= paymentAmount;
+    const payment = new PaymentModel<Payment>({
+      paymentAmount,
+      paymentMethod,
+      transactionId,
+      paymentDate,
+      projectId: projectId,
+    });
 
+    project.due -= paymentAmount;
     project.totalPaid += paymentAmount;
     project.paymentList.push(payment._id);
-    await project.save();
+
+    const isProjectSaved = await project.save();
+    if (!isProjectSaved) {
+      await payment.save();
+    }
+
     res.status(201).send({ payment, project });
   } catch (error) {
-    res.status(400).send(error);
-    console.log(error);
+    let errorMessage = 'Failed to do something exceptional';
+    if (error instanceof Error) {
+      errorMessage = error.message;
+    }
+    res.status(500).send({ message: errorMessage });
   }
 }
 

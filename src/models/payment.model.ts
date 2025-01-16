@@ -1,7 +1,7 @@
-import { model, Schema } from 'mongoose';
-import { PaymentType } from '../types/paymentType';
+import mongoose, { Schema } from 'mongoose';
+import { Payment } from '../types/payment.type';
 
-const paymentSchema = new Schema<PaymentType>(
+const paymentSchema = new Schema<Payment>(
   {
     projectId: {
       type: Schema.Types.ObjectId,
@@ -29,6 +29,6 @@ const paymentSchema = new Schema<PaymentType>(
   }
 );
 
-const Payment = model('Payment', paymentSchema);
+const PaymentModel = mongoose.model<Payment>('Payment', paymentSchema);
 
-export default Payment;
+export default PaymentModel;

@@ -1,6 +1,6 @@
 import { Types } from 'mongoose';
 
-export type PaymentType = {
+export type Payment = {
   projectId: Types.ObjectId;
   paymentDate: Date;
   paymentAmount: number;
