@@ -2,16 +2,17 @@ import { Request, Response } from 'express';
 
 import { generateUUID } from '../utils/uuidGenerator';
 import Fuse from 'fuse.js';
-import { ProjectType } from '../types/project.type';
 
-import Project from '../models/project.model';
 import ProjectManager from '../models/manager.model';
 import Payment from '../models/payment.model';
 import { User } from '../types/user.type';
 
+import { Project } from '../types/project.type';
+import ProjectModel from '../models/project.model';
+
 // Helper function to extract allowed updates
-const extractAllowedUpdates = (body: Partial<ProjectType>) => {
-  const allowedUpdates: (keyof ProjectType)[] = [
+const extractAllowedUpdates = (body: Partial<Project>) => {
+  const allowedUpdates: (keyof Project)[] = [
     'name',
     'budget',
     'advance',
@@ -30,7 +31,7 @@ const extractAllowedUpdates = (body: Partial<ProjectType>) => {
       acc[key] = body[key];
     }
     return acc;
-  }, {} as Partial<ProjectType>);
+  }, {} as Partial<Project>);
 };
 
 // GET: search project for manager
@@ -43,7 +44,7 @@ export async function searchProject(req: Request, res: Response) {
 
   try {
     const projectManagerId = (req.user as User)?._id;
-    const projects = await Project.find({
+    const projects = await ProjectModel.find({
       projectManager: projectManagerId,
     });
     const options = {
@@ -75,7 +76,7 @@ export async function searchProject(req: Request, res: Response) {
 export async function getProjectDetails(req: Request, res: Response) {
   try {
     const projectCode = req.params.projectCode;
-    const project = await Project.findOne({ projectCode })
+    const project = await ProjectModel.findOne({ projectCode })
       .populate({
         path: 'projectManager',
         select: '-_id -managerProjects -phone -userType -clientList',
@@ -107,10 +108,10 @@ export async function createNewProject(req: Request, res: Response) {
 
     do {
       projectCode = generateUUID();
-      existingProjectCode = await Project.findOne({ projectCode });
+      existingProjectCode = await ProjectModel.findOne({ projectCode });
     } while (existingProjectCode);
 
-    const newProject = new Project({
+    const newProject = new ProjectModel({
       projectCode,
       ...projectData,
       startDate,
@@ -118,7 +119,9 @@ export async function createNewProject(req: Request, res: Response) {
       projectManager: (req.user as User)?._id,
     });
 
-    const existingProject = await Project.findOne({ name: projectData.name });
+    const existingProject = await ProjectModel.findOne({
+      name: projectData.name,
+    });
 
     if (existingProject) {
       return res.status(400).json({ message: 'Project already exists' });
@@ -156,7 +159,7 @@ export async function updateProjectStatus(req: Request, res: Response) {
     const projectCode = req.params.projectCode;
     const { status } = req.body;
 
-    const updatedProject = await Project.findOneAndUpdate(
+    const updatedProject = await ProjectModel.findOneAndUpdate(
       { projectCode },
       { status },
       { new: true }
