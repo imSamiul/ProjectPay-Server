@@ -1,5 +1,5 @@
 import express from 'express';
-import { getManagerProjects } from '../controllers/managerController';
+import { getManagerProjects } from '../controllers/manager.controller';
 import { isAuthenticated } from '../middlewares/isAuthenticated';
 
 const router = express.Router();
