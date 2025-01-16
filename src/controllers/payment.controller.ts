@@ -4,6 +4,7 @@ import Project from '../models/project.model';
 
 import { Payment } from '../types/payment.type';
 import PaymentModel from '../models/payment.model';
+import ProjectModel from '../models/project.model';
 
 // GET:
 
@@ -42,7 +43,7 @@ export async function addPayment(req: Request, res: Response) {
     project.paymentList.push(payment._id);
 
     const isProjectSaved = await project.save();
-    if (!isProjectSaved) {
+    if (isProjectSaved) {
       await payment.save();
     }
 
@@ -67,7 +68,11 @@ export async function updatePayment(req: Request, res: Response) {
     projectId,
   } = req.body;
   try {
-    const updatedPayment = await Payment.findByIdAndUpdate(
+    const existingProject = await ProjectModel.findById(projectId);
+    if (!existingProject) {
+      return res.status(404).send('Project not found');
+    }
+    const updatedPayment = await PaymentModel.findByIdAndUpdate(
       { _id: paymentId },
       {
         paymentAmount,
@@ -82,11 +87,8 @@ export async function updatePayment(req: Request, res: Response) {
     if (!updatedPayment) {
       return res.status(404).send('Payment not found');
     }
-    const existingProject = await Project.findById(projectId);
-    if (!existingProject) {
-      return res.status(404).send('Project not found');
-    }
-    const updatedProject = await existingProject.reCalculateAll();
+
+    const updatedProject = await existingProject.recalculateAll();
     res.status(200).send({ updatedPayment, updatedProject });
   } catch (error) {
     res.status(500).send({

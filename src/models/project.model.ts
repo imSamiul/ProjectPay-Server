@@ -85,7 +85,7 @@ const projectSchema = new mongoose.Schema<
     ],
     projectManager: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
+      ref: 'ProjectManager',
       required: true,
     },
     paymentList: [
@@ -129,31 +129,35 @@ projectSchema.path('totalPaid').validate(function (value: number) {
   );
 }, 'Total Paid must be a positive number and less than or equal to the budget');
 
-projectSchema.methods.reCalculateAll = async function () {
+projectSchema.method('recalculateAll', async function reCalculateAll() {
   // this.due = this.budget - this.advance;
-
-  const result = await this.model('Payment').aggregate([
-    {
-      $match: {
-        projectId: this._id,
-      },
-    },
-    {
-      $group: {
-        _id: '$projectId',
-        totalPaid: {
-          $sum: '$paymentAmount',
+  try {
+    const result = await this.model('Payment').aggregate([
+      {
+        $match: {
+          projectId: this._id,
         },
       },
-    },
-  ]);
+      {
+        $group: {
+          _id: '$projectId',
+          totalPaid: {
+            $sum: '$paymentAmount',
+          },
+        },
+      },
+    ]);
 
-  this.totalPaid = result[0]?.totalPaid || 0;
-  this.due = this.budget - this.advance - this.totalPaid;
+    this.totalPaid = result[0]?.totalPaid || 0;
+    this.due = this.budget - this.advance - this.totalPaid;
 
-  await this.save();
-  return this;
-};
+    await this.save();
+    return this;
+  } catch (error) {
+    console.error(error);
+    return;
+  }
+});
 
 const ProjectModel = mongoose.model<Project, ProjectModel>(
   'Project',

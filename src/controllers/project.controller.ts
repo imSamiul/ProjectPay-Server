@@ -79,7 +79,7 @@ export async function getProjectDetails(req: Request, res: Response) {
     const project = await ProjectModel.findOne({ projectCode })
       .populate({
         path: 'projectManager',
-        select: '-_id -managerProjects -phone -userType -clientList',
+        select: '-managerProjects -clientList',
       })
       .populate('paymentList');
     if (!project) {
@@ -111,16 +111,24 @@ export async function createNewProject(req: Request, res: Response) {
       existingProjectCode = await ProjectModel.findOne({ projectCode });
     } while (existingProjectCode);
 
+    const findProjectManager = await ProjectManager.findOne({
+      userId: (req.user as User)?._id,
+    });
+    if (!findProjectManager) {
+      return res.status(404).json({ message: 'Project Manager not found' });
+    }
+
     const newProject = new ProjectModel({
       projectCode,
       ...projectData,
       startDate,
       status,
-      projectManager: (req.user as User)?._id,
+      projectManager: findProjectManager._id,
     });
 
     const existingProject = await ProjectModel.findOne({
       name: projectData.name,
+      projectCode: projectCode,
     });
 
     if (existingProject) {
