@@ -178,7 +178,6 @@ export async function updateProjectStatus(req: Request, res: Response) {
     res.status(500).json({
       message: errorMessage,
     });
-    console.log(error);
   }
 }
 
