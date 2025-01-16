@@ -91,10 +91,11 @@ export async function updatePayment(req: Request, res: Response) {
     const updatedProject = await existingProject.recalculateAll();
     res.status(200).send({ updatedPayment, updatedProject });
   } catch (error) {
-    res.status(500).send({
-      message:
-        error instanceof Error ? error.message : 'Failed to update payment',
-    });
+    let errorMessage = 'Failed to do something exceptional';
+    if (error instanceof Error) {
+      errorMessage = error.message;
+    }
+    res.status(500).send({ message: errorMessage });
   }
 }
 
@@ -102,7 +103,7 @@ export async function updatePayment(req: Request, res: Response) {
 export async function deletePayment(req: Request, res: Response) {
   const paymentId = req.params.paymentId;
   try {
-    const payment = await Payment.findByIdAndDelete(paymentId);
+    const payment = await PaymentModel.findByIdAndDelete(paymentId);
     if (!payment) {
       return res.status(404).send('Payment not found');
     }
@@ -111,14 +112,14 @@ export async function deletePayment(req: Request, res: Response) {
       return res.status(404).send('Project not found');
     }
 
-    const updatedProject = await project.reCalculateAll();
-    console.log(updatedProject);
+    const updatedProject = await project.recalculateAll();
 
     res.status(200).send({ payment, updatedProject });
   } catch (error) {
-    res.status(500).send({
-      message:
-        error instanceof Error ? error.message : 'Failed to delete payment',
-    });
+    let errorMessage = 'Failed to do something exceptional';
+    if (error instanceof Error) {
+      errorMessage = error.message;
+    }
+    res.status(500).send({ message: errorMessage });
   }
 }
