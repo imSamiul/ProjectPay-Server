@@ -68,7 +68,6 @@ export async function searchProject(req: Request, res: Response) {
     res.status(500).json({
       message: errorMessage,
     });
-    console.log(error);
   }
 }
 
@@ -231,7 +230,7 @@ export async function updateProjectDetails(req: Request, res: Response) {
 export async function deleteProject(req: Request, res: Response) {
   try {
     const projectId = req.params.projectId;
-    const project = await Project.findOneAndDelete({ _id: projectId });
+    const project = await ProjectModel.findOneAndDelete({ _id: projectId });
 
     if (!project) {
       return res.status(404).json({ message: 'Project not found' });
@@ -252,6 +251,5 @@ export async function deleteProject(req: Request, res: Response) {
     res.status(500).json({
       message: errorMessage,
     });
-    console.log(error);
   }
 }
