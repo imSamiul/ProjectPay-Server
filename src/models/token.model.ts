@@ -1,5 +1,5 @@
 import { model, Schema } from 'mongoose';
-import { TokenModel, TToken, TTokenMethods } from '../types/tokenType';
+import { TokenModel, TToken, TTokenMethods } from '../types/token.type';
 import ms from 'ms';
 
 // Define base UserType schema

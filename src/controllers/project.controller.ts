@@ -191,12 +191,12 @@ export async function updateProjectDetails(req: Request, res: Response) {
   }
 
   try {
-    const project = await Project.findOne({ projectCode });
+    const project = await ProjectModel.findOne({ projectCode });
     if (!project) {
       return res.status(404).json({ message: 'Project not found' });
     }
 
-    const updatedProject = await Project.findOneAndUpdate(
+    const updatedProject = await ProjectModel.findOneAndUpdate(
       { projectCode },
       {
         ...updates,
@@ -216,7 +216,6 @@ export async function updateProjectDetails(req: Request, res: Response) {
     res.status(500).json({
       message: errorMessage,
     });
-    console.log(error);
   }
 }
 
