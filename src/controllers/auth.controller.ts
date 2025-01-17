@@ -79,6 +79,7 @@ export async function handleSignUp(req: Request, res: Response) {
 // POST: Login User using form
 export async function handleLogin(req: Request, res: Response) {
   const { email, password } = req.body;
+
   if (!email || !password) {
     return res.status(422).json({ message: 'Please fill all the fields' });
   }
@@ -87,7 +88,7 @@ export async function handleLogin(req: Request, res: Response) {
     const user = await UserModel.findOne({ email });
     //send error if no user found:
     if (!user) {
-      return res.status(404).json({ error: 'No user found!' });
+      return res.status(400).json({ message: 'No user found!' });
     } else {
       //check if password is valid:
       const isPasswordValid = await bcrypt.compare(password, user.password);
@@ -116,7 +117,7 @@ export async function handleLogin(req: Request, res: Response) {
         });
       } else {
         //send error if password is invalid
-        return res.status(401).json({ error: 'Invalid password!' });
+        return res.status(401).json({ message: 'Invalid password!' });
       }
     }
   } catch (error) {
@@ -203,5 +204,75 @@ export async function generateRefreshToken(req: Request, res: Response) {
     }
 
     res.status(403).json({ message: errorMessage });
+  }
+}
+
+// POST: Add user other info
+export async function handleAddRole(req: Request, res: Response) {
+  const { email, googleId, role } = req.body;
+
+  if (!email || !googleId || !role) {
+    return res.status(422).json({ message: 'Please fill all the fields' });
+  }
+  const googleIdSecret = process.env.GOOGLE_ID_SECRET;
+  if (!googleIdSecret) {
+    return res.status(500).json({ message: 'Google ID secret not found' });
+  }
+  const googleIdString = jwt.verify(googleId, googleIdSecret) as {
+    googleId: string;
+  };
+
+  try {
+    // Find user with exact match of email and googleId
+    const user = await UserModel.findOne({
+      email,
+      googleId: googleIdString.googleId,
+    });
+
+    if (!user) {
+      return res.status(404).json({
+        message: 'User not found. Please complete Google authentication first.',
+      });
+    }
+
+    // Update role
+    user.role = role;
+    await user.save();
+
+    if (role === 'project_manager') {
+      const existingProjectManager = await ProjectManager.findOne({
+        userId: user._id,
+      });
+      if (!existingProjectManager) {
+        const newProjectManager = new ProjectManager({
+          userId: user._id,
+        });
+        await newProjectManager.save();
+      }
+    }
+
+    const accessToken = await user.createAccessToken();
+    const refreshToken = await user.createRefreshToken();
+    const refreshTokenLife = process.env.REFRESH_TOKEN_LIFE ?? '7d';
+    const jwtCookieExpire = ms(refreshTokenLife);
+
+    const options = {
+      expires: new Date(Date.now() + jwtCookieExpire),
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict' as const,
+    };
+
+    return res.status(200).cookie('refreshToken', refreshToken, options).json({
+      user,
+      accessToken,
+    });
+  } catch (error) {
+    console.error('Error in handleAddRole:', error);
+    let errorMessage = 'Failed to add user other info';
+    if (error instanceof Error) {
+      errorMessage = error.message;
+    }
+    return res.status(500).json({ message: errorMessage });
   }
 }

@@ -1,6 +1,7 @@
 import { model, Schema } from 'mongoose';
-import { TokenModel, TToken, TTokenMethods } from '../types/token.type';
+
 import ms from 'ms';
+import { TokenModel, TToken, TTokenMethods } from '../types/token.type';
 
 // Define base UserType schema
 const refreshTokenLife = process.env.REFRESH_TOKEN_LIFE ?? '7d';

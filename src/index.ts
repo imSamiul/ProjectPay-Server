@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import dotenv from 'dotenv';
 const env = process.env.NODE_ENV?.trim() || 'development';
 console.log(`Environment: ${env}`);
@@ -22,28 +23,14 @@ const PORT = process.env.PORT || 3000;
 
 // Passport setup
 import '../config/passport-setup';
+import passport from 'passport';
 
 // Middleware
 app.use(express.json());
 app.use(cookieParser(process.env.COOKIE_SECRET));
 
-// session middleware
-// app.use(
-//   session({
-//     secret: process.env.SESSION_SECRET || 'secret',
-//     resave: false,
-//     saveUninitialized: true,
-//     store: MongoStore.create({
-//       mongoUrl: process.env.MONGO_URI || 'mongodb://localhost:27017/ProjectPay',
-//       collectionName: 'sessions',
-//     }),
-//     cookie: {
-//       maxAge: 1000 * 60 * 60 * 24 * 7,
-//     },
-//   })
-// );
-// app.use(passport.initialize());
-// app.use(passport.session());
+app.use(passport.initialize());
+
 const corsOptions = {
   origin: 'http://localhost:3002', // Frontend URL
   credentials: true,

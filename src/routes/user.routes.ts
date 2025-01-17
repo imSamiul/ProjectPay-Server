@@ -8,7 +8,6 @@ const router = express.Router();
 router.get('/users/me', isAuthenticated, getUserDetails);
 
 // POST:
-// router.post('/user/addOtherInfo', ensureAuthenticated, addUserOtherInfo);
 
 // PATCH:
 

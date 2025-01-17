@@ -1,21 +1,7 @@
 import passport, { Profile } from 'passport';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
-
 import User from '../src/models/user.model';
-import { UserType } from '../src/types/user.type';
 
-passport.serializeUser((user, done) => {
-  done(null, (user as UserType)._id);
-});
-
-passport.deserializeUser(async (id, done) => {
-  try {
-    const user = await User.findById(id); // Fetch user from database
-    done(null, user);
-  } catch (err) {
-    done(err, null);
-  }
-});
 // google strategy
 passport.use(
   new GoogleStrategy(
@@ -31,32 +17,34 @@ passport.use(
       profile: Profile,
       done
     ) => {
-      // passport callback function
-      // check if user already exists in our db
-      console.log(profile);
-
       try {
         if (!profile.emails || profile.emails.length === 0) {
-          return done(
-            new Error('No email found in the Google profile'),
-            undefined
-          );
+          return done(new Error('No email found in the Google profile'));
         }
 
         // Extract the email
         const email = profile.emails[0]?.value;
 
-        const existingUser = await User.findOne({ googleId: profile.id });
-        if (!existingUser) {
-          const newUser = new User({
-            googleId: profile.id,
-            email: email,
-            userName: profile.displayName,
-          });
-          await newUser.save();
-          return done(null, newUser);
+        // Check if user exists with this email (either Google or normal signup)
+        const existingUser = await User.findOne({
+          $or: [{ email }, { googleId: profile.id }],
+        });
+
+        if (existingUser) {
+          if (!existingUser.googleId) {
+            return done(new Error('User already exists with this email'));
+          }
+          return done(null, existingUser);
         }
-        return done(null, existingUser);
+        // Create a new user
+        const newUser = new User({
+          googleId: profile.id,
+          email: email,
+          userName: profile.displayName,
+          avatar: profile.photos?.[0]?.value,
+        });
+        await newUser.save();
+        return done(null, newUser);
       } catch (error) {
         return done(error, undefined);
       }
