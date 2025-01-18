@@ -98,7 +98,7 @@ userSchema.method('createRefreshToken', async function createRefreshToken() {
 
 //pre save hook to hash password before saving user into the database:
 userSchema.pre('save', async function (next) {
-  if (this.isModified('password') || this.isNew) {
+  if (this.password && (this.isModified('password') || this.isNew)) {
     try {
       const salt = await bcrypt.genSalt(12); // generate hash salt of 12 rounds
       const hashedPassword = await bcrypt.hash(this.password, salt); // hash the current user's password
