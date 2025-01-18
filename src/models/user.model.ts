@@ -5,12 +5,12 @@ import jwt from 'jsonwebtoken';
 const { ACCESS_TOKEN_SECRET, REFRESH_TOKEN_SECRET } = process.env;
 
 import Token from './token.model';
-import { User, UserModel } from '../types/user.type';
+import { User, UserMethods, UserModel } from '../types/user.type';
 import { TToken } from '../types/token.type';
 import ms from 'ms';
 
 // Define base UserType schema
-const userSchema = new mongoose.Schema<User, UserModel>(
+const userSchema = new mongoose.Schema<User, UserModel, UserMethods>(
   {
     userName: {
       type: String,

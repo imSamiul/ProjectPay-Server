@@ -17,13 +17,9 @@ import jwt from 'jsonwebtoken';
 const router = express.Router();
 
 router.post('/signup', handleSignUp);
-
 router.post('/login', handleLogin);
-
 router.post('/refresh-token', generateRefreshToken);
-
 router.post('/logout', handleLogout);
-
 router.get('/users/me', isAuthenticated, (req, res) => {
   return res.status(200).json({ user: req.user });
 });

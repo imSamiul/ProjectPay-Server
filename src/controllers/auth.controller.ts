@@ -8,6 +8,8 @@ import jwt from 'jsonwebtoken';
 import ms from 'ms';
 import { User } from '../types/user.type';
 import UserModel from '../models/user.model';
+import Client from '../models/client.model';
+import ClientModel from '../models/client.model';
 
 // POST: Create a user using form
 export async function handleSignUp(req: Request, res: Response) {
@@ -43,8 +45,20 @@ export async function handleSignUp(req: Request, res: Response) {
           userId: newUser._id,
         });
         await newProjectManager.save();
+      } else if (role === 'client') {
+        const existingClient = await ClientModel.findOne({
+          userId: newUser._id,
+        });
+        if (existingClient) {
+          return res.status(400).json({
+            message: 'Client already exist with this email',
+          });
+        }
+        const newClient = new Client({
+          userId: newUser._id,
+        });
+        await newClient.save();
       }
-      // TODO: another if statement for client
       const accessToken = await newUser.createAccessToken();
       const refreshToken = await newUser.createRefreshToken();
 

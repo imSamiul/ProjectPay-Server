@@ -1,8 +1,7 @@
 import mongoose from 'mongoose';
+import { Client, ClientMethods, ClientModel } from '../types/clientType';
 
-import { ClientType } from '../types/clientType';
-
-const clientSchema = new mongoose.Schema<ClientType>(
+const clientSchema = new mongoose.Schema<Client, ClientModel, ClientMethods>(
   {
     userId: {
       type: mongoose.Schema.Types.ObjectId,
@@ -23,6 +22,6 @@ const clientSchema = new mongoose.Schema<ClientType>(
 );
 
 // Use discriminator to extend the base schema for clients
-const Client = mongoose.model<ClientType>('Client', clientSchema);
+const ClientModel = mongoose.model<Client, ClientModel>('Client', clientSchema);
 
-export default Client;
+export default ClientModel;

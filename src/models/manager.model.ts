@@ -1,8 +1,11 @@
 import mongoose from 'mongoose';
+import { Manager, ManagerMethods, ManagerModel } from '../types/managerType';
 
-import { ManagerType } from '../types/managerType';
-
-const managerSchema = new mongoose.Schema<ManagerType>(
+const managerSchema = new mongoose.Schema<
+  Manager,
+  ManagerModel,
+  ManagerMethods
+>(
   {
     userId: {
       type: mongoose.Schema.Types.ObjectId,
@@ -28,9 +31,9 @@ const managerSchema = new mongoose.Schema<ManagerType>(
 );
 
 // Update: Pass UserModel instead of IUser
-const ProjectManager = mongoose.model<ManagerType>(
+const ProjectManagerModel = mongoose.model<Manager, ManagerModel>(
   'ProjectManager',
   managerSchema
 );
 
-export default ProjectManager;
+export default ProjectManagerModel;
