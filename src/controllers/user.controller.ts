@@ -20,6 +20,7 @@ export async function getClientList(req: Request, res: Response) {
 export async function getUserDetails(req: Request, res: Response) {
   try {
     const user = req.user;
+
     const findUser = await UserModel.findById((user as User)._id);
     if (!user) {
       return res.status(200).json({ user: null });

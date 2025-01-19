@@ -70,6 +70,34 @@ export async function searchProject(req: Request, res: Response) {
     });
   }
 }
+// GET: search project for client
+export async function searchProjectForClient(req: Request, res: Response) {
+  const projectCode = req.query.projectCode;
+
+  if (!projectCode || typeof projectCode !== 'string') {
+    return res.status(400).json({ message: 'Search query is required' });
+  }
+
+  try {
+    const project = await ProjectModel.find(
+      {
+        projectCode: projectCode,
+      },
+      { projectCode: 1, name: 1, _id: 0 }
+    );
+
+    res.status(200).json(project);
+  } catch (error) {
+    let errorMessage = 'Failed to do something exceptional';
+    if (error instanceof Error) {
+      errorMessage = error.message;
+    }
+
+    res.status(500).json({
+      message: errorMessage,
+    });
+  }
+}
 
 // GET: get the project details
 export async function getProjectDetails(req: Request, res: Response) {

@@ -4,10 +4,12 @@ import {
   deleteProject,
   getProjectDetails,
   searchProject,
+  searchProjectForClient,
   updateProjectDetails,
   updateProjectStatus,
 } from '../controllers/project.controller';
 import { isAuthenticated } from '../middlewares/isAuthenticated';
+import { hasPermission, ROLE } from '../middlewares/hasPermission';
 
 const router = express.Router();
 
@@ -17,6 +19,12 @@ router.get(
   '/projects/details/:projectCode',
   isAuthenticated,
   getProjectDetails
+);
+router.get(
+  '/projects/client/search',
+  isAuthenticated,
+  hasPermission(ROLE.CLIENT),
+  searchProjectForClient
 );
 
 // POST:

@@ -21,6 +21,9 @@ export type Project = Document & {
   verifiedClientList: Types.ObjectId[];
   projectManager: Types.ObjectId;
   paymentList: Types.ObjectId[];
+  hasClientRequest: boolean;
+  requestedClientList: Types.ObjectId[];
+  approvedClientList: Types.ObjectId[];
 };
 
 export type ProjectMethods = {
