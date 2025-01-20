@@ -1,13 +1,13 @@
-import mongoose, { Document, Model } from 'mongoose';
+import { Document, Model, Types } from 'mongoose';
 
 export type User = Document & {
-  _id: mongoose.Types.ObjectId;
+  _id: Types.ObjectId;
   userName: string;
   email: string;
   password: string;
   role: string;
-  googleId: string;
-  avatar: {
+  googleId?: string;
+  avatar?: {
     data: string;
     type: string;
   };

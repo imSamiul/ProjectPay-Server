@@ -2,14 +2,14 @@ import { Request, Response } from 'express';
 
 import bcrypt from 'bcrypt';
 import ProjectManager from '../models/manager.model';
-import Token from '../models/token.model';
 
 import jwt from 'jsonwebtoken';
 import ms from 'ms';
-import { User } from '../types/user.type';
+
 import UserModel from '../models/user.model';
 import Client from '../models/client.model';
 import ClientModel from '../models/client.model';
+import TokenModel from '../models/token.model';
 
 // POST: Create a user using form
 export async function handleSignUp(req: Request, res: Response) {
@@ -23,42 +23,25 @@ export async function handleSignUp(req: Request, res: Response) {
     const existingUser = await UserModel.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ error: 'Email is taken.' });
-    } else {
-      //create new user and generate a pair of tokens and send
-      const newUser = new UserModel({
+    }
+
+    let newUser;
+
+    if (role === 'project_manager') {
+      newUser = new ProjectManager({
         userName,
         email,
         password,
-        role,
-      } as User);
-      const savedUser = await newUser.save();
-      if (role === 'project_manager') {
-        const existingProjectManager = await ProjectManager.findOne({
-          userId: newUser._id,
-        });
-        if (existingProjectManager) {
-          return res.status(400).json({
-            message: 'Project Manager already exist with this email',
-          });
-        }
-        const newProjectManager = new ProjectManager({
-          userId: newUser._id,
-        });
-        await newProjectManager.save();
-      } else if (role === 'client') {
-        const existingClient = await ClientModel.findOne({
-          userId: newUser._id,
-        });
-        if (existingClient) {
-          return res.status(400).json({
-            message: 'Client already exist with this email',
-          });
-        }
-        const newClient = new Client({
-          userId: newUser._id,
-        });
-        await newClient.save();
-      }
+      });
+    } else if (role === 'client') {
+      newUser = new Client({
+        userName,
+        email,
+        password,
+      });
+    }
+    if (newUser) {
+      newUser = await newUser.save();
       const accessToken = await newUser.createAccessToken();
       const refreshToken = await newUser.createRefreshToken();
 
@@ -77,7 +60,7 @@ export async function handleSignUp(req: Request, res: Response) {
       };
 
       res.status(201).cookie('refreshToken', refreshToken, options).json({
-        user: savedUser,
+        user: newUser,
         accessToken,
       });
     }
@@ -155,7 +138,7 @@ export async function handleLogout(req: Request, res: Response) {
     }
 
     // Find the user associated with the refresh token
-    const token = await Token.findOneAndDelete({ refreshToken });
+    const token = await TokenModel.findOneAndDelete({ refreshToken });
 
     // If no user is found, send an error response
     if (!token) {
@@ -191,7 +174,7 @@ export async function generateRefreshToken(req: Request, res: Response) {
       return res.status(403).json({ error: 'Access denied,token missing!' });
     } else {
       //query for the token to check if it is valid:
-      const tokenDoc = await Token.findOne({ refreshToken });
+      const tokenDoc = await TokenModel.findOne({ refreshToken });
       //send error if no token found:
       if (!tokenDoc) {
         return res.status(401).json({ error: 'Token expired!' });
@@ -238,43 +221,33 @@ export async function handleAddRole(req: Request, res: Response) {
 
   try {
     // Find user with exact match of email and googleId
-    const user = await UserModel.findOne({
+    const basicUser = await UserModel.findOne({
       email,
       googleId: googleIdString.googleId,
     });
 
-    if (!user) {
+    if (!basicUser) {
       return res.status(404).json({
         message: 'User not found. Please complete Google authentication first.',
       });
     }
 
-    // Update role
-    user.role = role;
-    await user.save();
-
+    let userModel;
     if (role === 'project_manager') {
-      const existingProjectManager = await ProjectManager.findOne({
-        userId: user._id,
-      });
-      if (!existingProjectManager) {
-        const newProjectManager = new ProjectManager({
-          userId: user._id,
-        });
-        await newProjectManager.save();
-      }
+      userModel = ProjectManager;
+    } else if (role === 'client') {
+      userModel = ClientModel;
+    } else {
+      return res.status(400).json({ message: 'Invalid role' });
     }
-    if (role === 'client') {
-      const existingClient = await ClientModel.findOne({
-        userId: user._id,
-      });
-      if (!existingClient) {
-        const newClient = new Client({
-          userId: user._id,
-        });
-        await newClient.save();
-      }
-    }
+
+    const newUser = new userModel({
+      ...basicUser.toObject(),
+      role,
+    });
+
+    await UserModel.findByIdAndDelete(basicUser._id);
+    const user = await newUser.save();
 
     const accessToken = await user.createAccessToken();
     const refreshToken = await user.createRefreshToken();

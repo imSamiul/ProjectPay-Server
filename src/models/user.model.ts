@@ -4,10 +4,11 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 const { ACCESS_TOKEN_SECRET, REFRESH_TOKEN_SECRET } = process.env;
 
-import Token from './token.model';
 import { User, UserMethods, UserModel } from '../types/user.type';
-import { TToken } from '../types/token.type';
+
 import ms from 'ms';
+import TokenModel from './token.model';
+import { Token } from '../types/token.type';
 
 // Define base UserType schema
 const userSchema = new mongoose.Schema<User, UserModel, UserMethods>(
@@ -40,8 +41,7 @@ const userSchema = new mongoose.Schema<User, UserModel, UserMethods>(
     },
     role: {
       type: String,
-      enum: ['project_manager', 'client'],
-      required: true,
+      enum: ['project_manager', 'client', 'pending'],
     },
     googleId: {
       type: String,
@@ -86,7 +86,7 @@ userSchema.method('createRefreshToken', async function createRefreshToken() {
         expiresIn: process.env.REFRESH_TOKEN_LIFE,
       }
     );
-    const token = new Token<TToken>({
+    const token = new TokenModel<Token>({
       userId: _id,
       refreshToken: refreshToken,
       expirationTime: new Date(Date.now() + ms(REFRESH_TOKEN_LIFE)),

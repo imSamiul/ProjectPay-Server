@@ -42,6 +42,7 @@ passport.use(
           email: email,
           userName: profile.displayName,
           avatar: profile.photos?.[0]?.value,
+          role: 'pending',
         });
         await newUser.save();
         return done(null, newUser);

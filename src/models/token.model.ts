@@ -1,11 +1,11 @@
 import { model, Schema } from 'mongoose';
 
 import ms from 'ms';
-import { TokenModel, TToken, TTokenMethods } from '../types/token.type';
+import { Token, TokenMethods, TokenModel } from '../types/token.type';
 
 // Define base UserType schema
 const refreshTokenLife = process.env.REFRESH_TOKEN_LIFE ?? '7d';
-const tokenSchema = new Schema<TToken, TokenModel, TTokenMethods>(
+const tokenSchema = new Schema<Token, TokenModel, TokenMethods>(
   {
     userId: {
       type: Schema.Types.ObjectId,
@@ -26,6 +26,6 @@ const tokenSchema = new Schema<TToken, TokenModel, TTokenMethods>(
 );
 
 // Create the base model
-const Token = model<TToken, TokenModel>('Token', tokenSchema);
+const TokenModel = model<Token, TokenModel>('Token', tokenSchema);
 
-export default Token;
+export default TokenModel;

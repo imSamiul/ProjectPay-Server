@@ -40,7 +40,7 @@ router.get(
       return res.status(500).json({ message: 'Google ID secret not found' });
     }
     const googleId = jwt.sign({ googleId: user.googleId }, googleIdSecret);
-    if (!user.role) {
+    if (user.role === 'pending') {
       return res.redirect(
         `${process.env.FRONTEND_URL}/signup/addOtherInfo?email=${user.email}&googleId=${googleId}`
       );
