@@ -88,17 +88,7 @@ const projectSchema = new mongoose.Schema<
         ref: 'Payment',
       },
     ],
-    hasClientRequest: {
-      type: Boolean,
 
-      default: false,
-    },
-    requestedClientList: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Client',
-      },
-    ],
     approvedClientList: [
       {
         type: mongoose.Schema.Types.ObjectId,

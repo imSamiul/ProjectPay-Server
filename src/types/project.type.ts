@@ -20,8 +20,6 @@ export type Project = Document & {
   status: boolean;
   projectManager: Types.ObjectId;
   paymentList: Types.ObjectId[];
-  hasClientRequest: boolean;
-  requestedClientList: Types.ObjectId[];
   approvedClientList: Types.ObjectId[];
 };
 

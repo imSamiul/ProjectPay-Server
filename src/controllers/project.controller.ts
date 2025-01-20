@@ -9,7 +9,7 @@ import { User } from '../types/user.type';
 
 import { Project } from '../types/project.type';
 import ProjectModel from '../models/project.model';
-import ClientModel from '../models/client.model';
+
 import ProjectManagerModel from '../models/manager.model';
 
 // Helper function to extract allowed updates
@@ -239,118 +239,6 @@ export async function updateProjectDetails(req: Request, res: Response) {
     res.status(200).json(updatedProject);
   } catch (error) {
     let errorMessage = 'Failed to update project details';
-    if (error instanceof Error) {
-      errorMessage = error.message;
-    }
-    res.status(500).json({
-      message: errorMessage,
-    });
-  }
-}
-
-//PATCH: handle send request to manager from client to access the project
-export async function handleClientRequest(req: Request, res: Response) {
-  try {
-    const projectCode = req.params.projectCode;
-    const findClient = await ClientModel.findOne({ userId: req.user?._id });
-    if (!findClient) {
-      return res.status(404).json({ message: 'Client not found' });
-    }
-    // check if the client has already requested the project
-    const project = await ProjectModel.findOne({
-      projectCode,
-      requestedClientList: { $in: [findClient._id] },
-    });
-    if (project) {
-      return res.status(400).json({ message: 'Client already requested' });
-    }
-
-    const updatedProject = await ProjectModel.findOneAndUpdate(
-      { projectCode },
-      {
-        hasClientRequest: true,
-        $push: { requestedClientList: findClient._id },
-      },
-      { new: true }
-    );
-
-    if (!updatedProject) {
-      return res.status(404).json({ message: 'Project not found' });
-    }
-
-    res.status(200).json(updatedProject);
-  } catch (error) {
-    let errorMessage = 'Failed to update project status';
-    if (error instanceof Error) {
-      errorMessage = error.message;
-    }
-    res.status(500).json({
-      message: errorMessage,
-    });
-  }
-}
-// PATCH: handle accept client request to access the project for manager
-export async function acceptClientRequest(req: Request, res: Response) {
-  try {
-    const projectId = req.params.projectId;
-
-    const findManager = await ProjectManagerModel.findOne({
-      userId: req.user?._id,
-    });
-    if (!findManager) {
-      return res.status(404).json({ message: 'Project Manager not found' });
-    }
-    if (!req.body.clientId) {
-      return res.status(400).json({ message: 'Client ID is required' });
-    }
-    // check if the client does not exist in the requestedClientList
-    const project = await ProjectModel.findOne({
-      _id: projectId,
-      requestedClientList: { $in: [req.body.clientId] },
-      projectManager: findManager._id,
-    });
-    if (!project) {
-      return res.status(400).json({ message: 'Client request not found' });
-    }
-    const findClient = await ClientModel.findOne({ _id: req.body.clientId });
-    if (!findClient) {
-      return res.status(404).json({ message: 'Client not found' });
-    }
-
-    const updatedProject = await ProjectModel.findOneAndUpdate(
-      {
-        _id: projectId,
-        requestedClientList: { $in: [req.body.clientId] },
-        projectManager: findManager._id,
-      },
-      {
-        hasClientRequest: false,
-        $push: { approvedClientList: req.body.clientId },
-        $pull: { requestedClientList: req.body.clientId },
-      },
-      {
-        new: true,
-      }
-    );
-
-    if (!updatedProject) {
-      return res.status(404).json({ message: 'Project not found' });
-    }
-    // update client's clientProjects array
-    const updatedClient = await ClientModel.findOneAndUpdate(
-      { _id: req.body.clientId },
-      {
-        $push: { clientProjects: updatedProject._id },
-      },
-      { new: true }
-    );
-    if (!updatedClient) {
-      return res.status(404).json({ message: 'Client not found' });
-    }
-
-    res.status(200).json({ updatedProject, updatedClient });
-  } catch (error) {
-    let errorMessage = 'Failed to update project status';
     if (error instanceof Error) {
       errorMessage = error.message;
     }

@@ -1,10 +1,8 @@
 import express from 'express';
 import {
-  acceptClientRequest,
   createNewProject,
   deleteProject,
   getProjectDetails,
-  handleClientRequest,
   searchProject,
   searchProjectForClient,
   updateProjectDetails,
@@ -48,13 +46,6 @@ router.patch(
   updateProjectDetails
 );
 
-router.patch(
-  '/projects/acceptClientRequest/:projectId',
-  isAuthenticated,
-  hasPermission(ROLE.PROJECT_MANAGER),
-  acceptClientRequest
-);
-
 // DELETE:
 router.delete(
   '/projects/delete/:projectId',
@@ -73,12 +64,6 @@ router.get(
   searchProjectForClient
 );
 // PATCH:
-router.patch(
-  '/projects/sendClientRequest/:projectCode',
-  isAuthenticated,
-  hasPermission(ROLE.CLIENT),
-  handleClientRequest
-);
 
 // ------------ FOR BOTH: ------------
 // GET:
