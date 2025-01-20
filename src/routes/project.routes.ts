@@ -15,41 +15,38 @@ import { hasPermission, ROLE } from '../middlewares/hasPermission';
 
 const router = express.Router();
 
+// ------------- FOR MANAGER: -------------
 // GET:
-router.get('/projects/search', isAuthenticated, searchProject);
 router.get(
-  '/projects/details/:projectCode',
+  '/projects/search',
   isAuthenticated,
-  getProjectDetails
-);
-router.get(
-  '/projects/client/search',
-  isAuthenticated,
-  hasPermission(ROLE.CLIENT),
-  searchProjectForClient
+  hasPermission(ROLE.PROJECT_MANAGER),
+  searchProject
 );
 
 // POST:
 // create a new project
-router.post('/projects/create', isAuthenticated, createNewProject);
+router.post(
+  '/projects/create',
+  isAuthenticated,
+  hasPermission(ROLE.PROJECT_MANAGER),
+  createNewProject
+);
 
 // PATCH:
 router.patch(
   '/projects/updateProjectStatus/:projectCode',
   isAuthenticated,
+  hasPermission(ROLE.PROJECT_MANAGER),
   updateProjectStatus
 );
 router.patch(
   '/projects/updateProjectDetails/:projectCode',
   isAuthenticated,
+  hasPermission(ROLE.PROJECT_MANAGER),
   updateProjectDetails
 );
-router.patch(
-  '/projects/sendClientRequest/:projectCode',
-  isAuthenticated,
-  hasPermission(ROLE.CLIENT),
-  handleClientRequest
-);
+
 router.patch(
   '/projects/acceptClientRequest/:projectId',
   isAuthenticated,
@@ -58,6 +55,35 @@ router.patch(
 );
 
 // DELETE:
-router.delete('/projects/delete/:projectId', isAuthenticated, deleteProject);
+router.delete(
+  '/projects/delete/:projectId',
+  isAuthenticated,
+  hasPermission(ROLE.PROJECT_MANAGER),
+  deleteProject
+);
 
+// ------------- FOR CLIENT: -------------
+// GET:
+// TODO: Will delete if necessary
+router.get(
+  '/projects/client/search',
+  isAuthenticated,
+  hasPermission(ROLE.CLIENT),
+  searchProjectForClient
+);
+// PATCH:
+router.patch(
+  '/projects/sendClientRequest/:projectCode',
+  isAuthenticated,
+  hasPermission(ROLE.CLIENT),
+  handleClientRequest
+);
+
+// ------------ FOR BOTH: ------------
+// GET:
+router.get(
+  '/projects/details/:projectCode',
+  isAuthenticated,
+  getProjectDetails
+);
 export default router;

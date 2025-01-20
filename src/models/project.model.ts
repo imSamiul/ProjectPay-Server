@@ -79,7 +79,7 @@ const projectSchema = new mongoose.Schema<
 
     projectManager: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'ProjectManager',
+      ref: 'User',
       required: true,
     },
     paymentList: [

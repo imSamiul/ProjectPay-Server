@@ -73,6 +73,7 @@ export async function searchProject(req: Request, res: Response) {
   }
 }
 // GET: search project for client
+// TODO: will delete this if necessary
 export async function searchProjectForClient(req: Request, res: Response) {
   const projectCode = req.query.projectCode;
 
@@ -140,21 +141,6 @@ export async function createNewProject(req: Request, res: Response) {
       existingProjectCode = await ProjectModel.findOne({ projectCode });
     } while (existingProjectCode);
 
-    const findProjectManager = await ProjectManager.findOne({
-      userId: (req.user as User)?._id,
-    });
-    if (!findProjectManager) {
-      return res.status(404).json({ message: 'Project Manager not found' });
-    }
-
-    const newProject = new ProjectModel({
-      projectCode,
-      ...projectData,
-      startDate,
-      status,
-      projectManager: findProjectManager._id,
-    });
-
     const existingProject = await ProjectModel.findOne({
       name: projectData.name,
       projectCode: projectCode,
@@ -163,6 +149,13 @@ export async function createNewProject(req: Request, res: Response) {
     if (existingProject) {
       return res.status(400).json({ message: 'Project already exists' });
     }
+    const newProject = new ProjectModel({
+      projectCode,
+      ...projectData,
+      startDate,
+      status,
+      projectManager: (req.user as User)?._id,
+    });
 
     const savedProject = await newProject.save();
 
@@ -170,7 +163,6 @@ export async function createNewProject(req: Request, res: Response) {
       await ProjectManager.findOneAndUpdate(
         {
           _id: (req.user as User)?._id,
-          userType: 'project manager',
         },
         {
           $push: { managerProjects: savedProject._id },
@@ -372,7 +364,10 @@ export async function acceptClientRequest(req: Request, res: Response) {
 export async function deleteProject(req: Request, res: Response) {
   try {
     const projectId = req.params.projectId;
-    const project = await ProjectModel.findOneAndDelete({ _id: projectId });
+    const project = await ProjectModel.findOneAndDelete({
+      _id: projectId,
+      projectManager: req.user?._id,
+    });
 
     if (!project) {
       return res.status(404).json({ message: 'Project not found' });
@@ -383,6 +378,10 @@ export async function deleteProject(req: Request, res: Response) {
 
     // Delete all payments related to the project using the IDs in paymentList
     await Payment.deleteMany({ _id: { $in: paymentIds } });
+    await ProjectManagerModel.findOneAndUpdate(
+      { _id: project.projectManager },
+      { $pull: { managerProjects: project._id } }
+    );
 
     res.status(200).json(project);
   } catch (error) {
