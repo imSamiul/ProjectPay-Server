@@ -40,6 +40,8 @@ const userSchema = new mongoose.Schema<User, UserModel, UserMethods>(
     },
     role: {
       type: String,
+      enum: ['project_manager', 'client'],
+      required: true,
     },
     googleId: {
       type: String,
@@ -51,6 +53,7 @@ const userSchema = new mongoose.Schema<User, UserModel, UserMethods>(
   },
   {
     timestamps: true,
+    discriminatorKey: 'role',
   }
 );
 

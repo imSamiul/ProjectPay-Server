@@ -18,7 +18,6 @@ export type Project = Document & {
   typeOfWeb: string;
   description: string;
   status: boolean;
-  verifiedClientList: Types.ObjectId[];
   projectManager: Types.ObjectId;
   paymentList: Types.ObjectId[];
   hasClientRequest: boolean;

@@ -1,27 +1,30 @@
 import mongoose from 'mongoose';
 import { Client, ClientMethods, ClientModel } from '../types/clientType';
+import UserModel from './user.model';
 
-const clientSchema = new mongoose.Schema<Client, ClientModel, ClientMethods>(
-  {
-    userId: {
+const clientSchema = new mongoose.Schema<Client, ClientModel, ClientMethods>({
+  clientProjects: [
+    {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
+      ref: 'Project',
     },
-
-    // Specific fields for the client
-    clientProjects: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Project',
-      },
-    ], // List of project IDs connected to the client
+  ],
+  hasProjectInvitation: {
+    type: Boolean,
+    default: false,
   },
-  {
-    timestamps: true,
-  }
-);
+  projectInvitations: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Project',
+    },
+  ],
+});
 
 // Use discriminator to extend the base schema for clients
-const ClientModel = mongoose.model<Client, ClientModel>('Client', clientSchema);
+const ClientModel = UserModel.discriminator<Client, ClientModel>(
+  'client',
+  clientSchema
+);
 
 export default ClientModel;

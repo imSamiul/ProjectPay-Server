@@ -1,38 +1,24 @@
-import mongoose from 'mongoose';
+import { Schema } from 'mongoose';
 import { Manager, ManagerMethods, ManagerModel } from '../types/managerType';
+import UserModel from './user.model';
 
-const managerSchema = new mongoose.Schema<
-  Manager,
-  ManagerModel,
-  ManagerMethods
->(
-  {
-    userId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
+const managerSchema = new Schema<Manager, ManagerModel, ManagerMethods>({
+  managerProjects: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: 'Project',
     },
+  ],
+  clientList: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: 'Client',
+    },
+  ],
+});
 
-    managerProjects: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Project',
-      },
-    ], // List of project IDs connected to the client
-    clientList: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Client',
-      },
-    ],
-  },
-  {
-    timestamps: true,
-  }
-);
-
-// Update: Pass UserModel instead of IUser
-const ProjectManagerModel = mongoose.model<Manager, ManagerModel>(
-  'ProjectManager',
+const ProjectManagerModel = UserModel.discriminator<Manager, ManagerModel>(
+  'project_manager',
   managerSchema
 );
 

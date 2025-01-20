@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 
 export const ROLE = {
-  ADMIN: 'admin',
+  PROJECT_MANAGER: 'project_manager',
   CLIENT: 'client',
 };
 

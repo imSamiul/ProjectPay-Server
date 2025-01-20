@@ -77,12 +77,6 @@ const projectSchema = new mongoose.Schema<
       default: false,
     },
 
-    verifiedClientList: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Client',
-      },
-    ],
     projectManager: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'ProjectManager',

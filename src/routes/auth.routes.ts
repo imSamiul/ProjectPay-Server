@@ -7,7 +7,7 @@ import {
   handleLogout,
   handleSignUp,
 } from '../controllers/auth.controller';
-import { isAuthenticated } from '../middlewares/isAuthenticated';
+
 import passport from 'passport';
 import { User } from '../types/user.type';
 import UserModel from '../models/user.model';
@@ -20,9 +20,6 @@ router.post('/signup', handleSignUp);
 router.post('/login', handleLogin);
 router.post('/refresh-token', generateRefreshToken);
 router.post('/logout', handleLogout);
-router.get('/users/me', isAuthenticated, (req, res) => {
-  return res.status(200).json({ user: req.user });
-});
 
 // login with OAuth route
 router.get(

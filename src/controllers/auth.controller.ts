@@ -264,6 +264,17 @@ export async function handleAddRole(req: Request, res: Response) {
         await newProjectManager.save();
       }
     }
+    if (role === 'client') {
+      const existingClient = await ClientModel.findOne({
+        userId: user._id,
+      });
+      if (!existingClient) {
+        const newClient = new Client({
+          userId: user._id,
+        });
+        await newClient.save();
+      }
+    }
 
     const accessToken = await user.createAccessToken();
     const refreshToken = await user.createRefreshToken();
