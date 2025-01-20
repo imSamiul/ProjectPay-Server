@@ -10,6 +10,7 @@ import cors from 'cors';
 import userRoutes from './routes/user.routes';
 import projectRoutes from './routes/project.routes';
 import managerRoutes from './routes/manager.routes';
+import clientRoutes from './routes/client.routes';
 import paymentRoutes from './routes/payment.routes';
 import authRoutes from './routes/auth.routes';
 import connectDB from './db/mongoose';
@@ -47,6 +48,7 @@ app.get('/', (req, res) => {
 app.use('/api', userRoutes);
 app.use('/api', projectRoutes);
 app.use('/api', managerRoutes);
+app.use('/api', clientRoutes);
 app.use('/api', paymentRoutes);
 app.use('/api/auth', authRoutes);
 

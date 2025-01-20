@@ -17,6 +17,7 @@ const router = express.Router();
 
 // ------------- FOR MANAGER: -------------
 // GET:
+// search for projects
 router.get(
   '/projects/search',
   isAuthenticated,
