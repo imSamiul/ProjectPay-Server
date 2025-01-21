@@ -4,7 +4,6 @@ import {
   deleteProject,
   getProjectDetails,
   searchProject,
-  searchProjectForClient,
   updateProjectDetails,
   updateProjectStatus,
 } from '../controllers/project.controller';
@@ -56,13 +55,7 @@ router.delete(
 
 // ------------- FOR CLIENT: -------------
 // GET:
-// TODO: Will delete if necessary
-router.get(
-  '/projects/client/search',
-  isAuthenticated,
-  hasPermission(ROLE.CLIENT),
-  searchProjectForClient
-);
+
 // PATCH:
 
 // ------------ FOR BOTH: ------------

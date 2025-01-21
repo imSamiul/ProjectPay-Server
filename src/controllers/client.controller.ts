@@ -50,6 +50,7 @@ export async function sendInvitationToClient(req: Request, res: Response) {
     const findClient = await ClientModel.findOne({
       email: email,
       projectInvitations: { $nin: [projectId] },
+      clientProjects: { $nin: [projectId] },
     });
     if (!findClient) {
       return res.status(404).json({

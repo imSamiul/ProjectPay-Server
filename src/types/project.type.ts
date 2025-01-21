@@ -7,15 +7,10 @@ export type Project = Document & {
   advance: number;
   due: number;
   totalPaid: number;
-  clientName: string;
   clientPhone: string;
   clientEmail: string;
-  clientAddress: string;
-  clientDetails: string;
   startDate: string;
   endDate: string;
-  demoLink: string;
-  typeOfWeb: string;
   description: string;
   status: boolean;
   projectManager: Types.ObjectId;

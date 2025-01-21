@@ -18,14 +18,12 @@ const extractAllowedUpdates = (body: Partial<Project>) => {
     'name',
     'budget',
     'advance',
-    'clientName',
+
     'clientPhone',
     'clientEmail',
-    'clientAddress',
-    'clientDetails',
+
     'endDate',
-    'demoLink',
-    'typeOfWeb',
+
     'description',
   ];
   return allowedUpdates.reduce((acc, key) => {
@@ -72,35 +70,6 @@ export async function searchProject(req: Request, res: Response) {
     });
   }
 }
-// GET: search project for client
-// TODO: will delete this if necessary
-export async function searchProjectForClient(req: Request, res: Response) {
-  const projectCode = req.query.projectCode;
-
-  if (!projectCode || typeof projectCode !== 'string') {
-    return res.status(400).json({ message: 'Search query is required' });
-  }
-
-  try {
-    const project = await ProjectModel.find(
-      {
-        projectCode: projectCode,
-      },
-      { projectCode: 1, name: 1, _id: 0 }
-    );
-
-    res.status(200).json(project);
-  } catch (error) {
-    let errorMessage = 'Failed to do something exceptional';
-    if (error instanceof Error) {
-      errorMessage = error.message;
-    }
-
-    res.status(500).json({
-      message: errorMessage,
-    });
-  }
-}
 
 // GET: get the project details
 export async function getProjectDetails(req: Request, res: Response) {
@@ -109,9 +78,14 @@ export async function getProjectDetails(req: Request, res: Response) {
     const project = await ProjectModel.findOne({ projectCode })
       .populate({
         path: 'projectManager',
-        select: '-managerProjects -clientList',
+        select: '-managerProjects -clientList -role -createdAt -updatedAt -__v',
       })
-      .populate('paymentList');
+      .populate('paymentList')
+      .populate({
+        path: 'approvedClientList',
+        select:
+          '-role -clientProjects -hasProjectInvitation -projectInvitations -createdAt -updatedAt -__v',
+      });
     if (!project) {
       return res.status(404).json({ message: 'Project not found' });
     }

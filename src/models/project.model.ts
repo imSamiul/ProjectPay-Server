@@ -33,11 +33,7 @@ const projectSchema = new mongoose.Schema<
       type: Number,
       default: 0,
     },
-    clientName: {
-      type: String,
-      required: true,
-      ref: 'Client',
-    },
+
     clientPhone: {
       type: String,
       required: true,
@@ -46,12 +42,7 @@ const projectSchema = new mongoose.Schema<
       type: String,
       required: true,
     },
-    clientAddress: {
-      type: String,
-    },
-    clientDetails: {
-      type: String,
-    },
+
     startDate: {
       type: String,
       required: true,
@@ -62,12 +53,7 @@ const projectSchema = new mongoose.Schema<
       type: String,
       required: true,
     },
-    demoLink: {
-      type: String,
-    },
-    typeOfWeb: {
-      type: String,
-    },
+
     description: {
       type: String,
     },
@@ -79,20 +65,20 @@ const projectSchema = new mongoose.Schema<
 
     projectManager: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
+      ref: 'project_manager',
       required: true,
     },
     paymentList: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Payment',
+        ref: 'payment',
       },
     ],
 
     approvedClientList: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Client',
+        ref: 'client',
       },
     ],
   },
