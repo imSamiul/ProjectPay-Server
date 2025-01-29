@@ -81,6 +81,12 @@ const projectSchema = new mongoose.Schema<
         ref: 'client',
       },
     ],
+    requestedClientList: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'client',
+      },
+    ],
   },
   {
     timestamps: true,

@@ -16,6 +16,7 @@ export type Project = Document & {
   projectManager: Types.ObjectId;
   paymentList: Types.ObjectId[];
   approvedClientList: Types.ObjectId[];
+  requestedClientList: Types.ObjectId[];
 };
 
 export type ProjectMethods = {
@@ -23,3 +24,11 @@ export type ProjectMethods = {
 };
 
 export type ProjectModel = Model<Project, object, ProjectMethods>;
+
+export type InvitationChecks = {
+  project: boolean;
+  client: boolean;
+  hasAccess: boolean;
+  hasPendingInvitation: boolean;
+  isRequested: boolean;
+};

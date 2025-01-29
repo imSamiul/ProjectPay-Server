@@ -14,10 +14,11 @@ const router = express.Router();
 // Search for a client
 router.get(
   '/clients/search',
+  isAuthenticated,
   hasPermission(ROLE.PROJECT_MANAGER),
   searchClient
 );
-// Get all invitations project for a client
+// Get all invitations of a project for a client
 router.get(
   '/clients/invitations',
   isAuthenticated,
