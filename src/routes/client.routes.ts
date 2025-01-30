@@ -3,7 +3,6 @@ import {
   acceptProjectInvitation,
   getClientInvitations,
   searchClient,
-  sendInvitationToClient,
 } from '../controllers/client.controller';
 import { hasPermission, ROLE } from '../middlewares/hasPermission';
 import { isAuthenticated } from '../middlewares/isAuthenticated';
@@ -13,7 +12,7 @@ const router = express.Router();
 // GET:
 // Search for a client
 router.get(
-  '/clients/search',
+  '/clients',
   isAuthenticated,
   hasPermission(ROLE.PROJECT_MANAGER),
   searchClient
@@ -28,13 +27,7 @@ router.get(
 
 // POST:
 // PATCH:
-// send invitation to client to join project
-router.patch(
-  '/clients/sendInvitation/:projectId',
-  isAuthenticated,
-  hasPermission(ROLE.PROJECT_MANAGER),
-  sendInvitationToClient
-);
+
 router.patch(
   '/clients/acceptProjectInvitation/:projectId',
   isAuthenticated,

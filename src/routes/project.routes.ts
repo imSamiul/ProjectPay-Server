@@ -1,14 +1,16 @@
 import express from 'express';
+
 import {
   createNewProject,
   deleteProject,
   getProjectDetails,
   searchProject,
+  sendInvitationToClient,
   updateProjectDetails,
   updateProjectStatus,
 } from '../controllers/project.controller';
-import { isAuthenticated } from '../middlewares/isAuthenticated';
 import { hasPermission, ROLE } from '../middlewares/hasPermission';
+import { isAuthenticated } from '../middlewares/isAuthenticated';
 
 const router = express.Router();
 
@@ -44,6 +46,13 @@ router.patch(
   hasPermission(ROLE.PROJECT_MANAGER),
   updateProjectDetails
 );
+// send invitation to client to join project
+router.patch(
+  '/projects/invite/:projectId',
+  isAuthenticated,
+  hasPermission(ROLE.PROJECT_MANAGER),
+  sendInvitationToClient
+);
 
 // DELETE:
 router.delete(
@@ -65,4 +74,5 @@ router.get(
   isAuthenticated,
   getProjectDetails
 );
+
 export default router;

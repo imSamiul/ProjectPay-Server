@@ -6,10 +6,12 @@ import ProjectManager from '../models/manager.model';
 import jwt from 'jsonwebtoken';
 import ms from 'ms';
 
-import UserModel from '../models/user.model';
-import Client from '../models/client.model';
-import ClientModel from '../models/client.model';
+import {
+  default as Client,
+  default as ClientModel,
+} from '../models/client.model';
 import TokenModel from '../models/token.model';
+import UserModel from '../models/user.model';
 
 // POST: Create a user using form
 export async function handleSignUp(req: Request, res: Response) {
@@ -40,7 +42,12 @@ export async function handleSignUp(req: Request, res: Response) {
         password,
       });
     }
-    if (newUser) {
+
+    if (!newUser) {
+      return res.status(400).json({ message: 'Invalid role specified' });
+    }
+
+    try {
       newUser = await newUser.save();
       const accessToken = await newUser.createAccessToken();
       const refreshToken = await newUser.createRefreshToken();
@@ -63,13 +70,18 @@ export async function handleSignUp(req: Request, res: Response) {
         user: newUser,
         accessToken,
       });
+    } catch (saveError) {
+      console.error('Error saving user:', saveError);
+      return res.status(500).json({
+        message: 'Error creating account',
+        error: saveError instanceof Error ? saveError.message : 'Unknown error',
+      });
     }
   } catch (error) {
-    let errorMessage = 'Failed to do something exceptional';
-    if (error instanceof Error) {
-      errorMessage = error.message;
-    }
-    res.status(500).send({ message: errorMessage });
+    console.error('SignUp Error:', error);
+    const errorMessage =
+      error instanceof Error ? error.message : 'Failed to create account';
+    res.status(500).json({ message: errorMessage });
   }
 }
 

@@ -1,15 +1,17 @@
 import { Request, Response } from 'express';
 
-import { generateUUID } from '../utils/uuidGenerator';
 import Fuse from 'fuse.js';
+import { generateUUID } from '../utils/uuidGenerator';
 
 import ProjectManager from '../models/manager.model';
 import Payment from '../models/payment.model';
 import { User } from '../types/user.type';
 
-import { Project } from '../types/project.type';
 import ProjectModel from '../models/project.model';
+import { InvitationChecks, Project } from '../types/project.type';
 
+import mongoose from 'mongoose';
+import ClientModel from '../models/client.model';
 import ProjectManagerModel from '../models/manager.model';
 
 // Helper function to extract allowed updates
@@ -83,6 +85,11 @@ export async function getProjectDetails(req: Request, res: Response) {
       .populate('paymentList')
       .populate({
         path: 'approvedClientList',
+        select:
+          '-role -clientProjects -hasProjectInvitation -projectInvitations -createdAt -updatedAt -__v',
+      })
+      .populate({
+        path: 'requestedClientList',
         select:
           '-role -clientProjects -hasProjectInvitation -projectInvitations -createdAt -updatedAt -__v',
       });
@@ -219,6 +226,97 @@ export async function updateProjectDetails(req: Request, res: Response) {
     res.status(500).json({
       message: errorMessage,
     });
+  }
+}
+//PATCH: handle send invitation to a client to join a project
+
+export async function sendInvitationToClient(req: Request, res: Response) {
+  try {
+    const { clientId } = req.body;
+    const projectId = req.params.projectId;
+    const managerId = req.user?._id; // Get the current manager's ID
+
+    const [project, client] = await Promise.all([
+      ProjectModel.findOne({
+        _id: projectId,
+        projectManager: managerId, // Add this check to verify project ownership
+      }),
+      ClientModel.findOne({ clientId }),
+    ]);
+
+    // Convert projectId to ObjectId
+    const projectObjectId = new mongoose.Types.ObjectId(projectId);
+
+    // Initial validation
+    const checks: InvitationChecks = {
+      project: Boolean(project),
+      client: Boolean(client),
+      hasAccess: false,
+      hasPendingInvitation: false,
+      isRequested: false,
+    };
+
+    // If either project or client is not found, return early
+    if (!checks.project) {
+      return res.status(403).json({
+        message: 'Unauthorized: You are not the manager of this project',
+      });
+    }
+    if (!checks.client) {
+      return res.status(404).json({ message: 'Client not found' });
+    }
+
+    // Perform remaining checks
+    checks.hasAccess = client!.clientProjects.some((id) =>
+      id.equals(projectObjectId)
+    );
+    checks.hasPendingInvitation = client!.projectInvitations.some((id) =>
+      id.equals(projectObjectId)
+    );
+    checks.isRequested = project!.requestedClientList.some((id) =>
+      id.equals(client!._id)
+    );
+
+    // Validate checks
+    if (checks.hasAccess) {
+      return res.status(400).json({
+        message: 'Client already has access to the project',
+      });
+    }
+    if (checks.hasPendingInvitation) {
+      return res.status(400).json({
+        message: 'Client already has a pending invitation',
+      });
+    }
+
+    // Update client and project in parallel
+    const [updatedClient, updatedProject] = await Promise.all([
+      ClientModel.findOneAndUpdate(
+        { email: client!.email },
+        {
+          hasProjectInvitation: true,
+          $push: { projectInvitations: projectObjectId },
+        },
+        { new: true }
+      ),
+      ProjectModel.findByIdAndUpdate(
+        projectObjectId,
+        {
+          $push: { requestedClientList: client!._id },
+        },
+        { new: true }
+      ),
+    ]);
+
+    return res.status(200).json({
+      message: 'Invitation sent successfully',
+      client: updatedClient,
+      project: updatedProject,
+    });
+  } catch (error) {
+    const errorMessage =
+      error instanceof Error ? error.message : 'Failed to send invitation';
+    return res.status(500).json({ message: errorMessage });
   }
 }
 

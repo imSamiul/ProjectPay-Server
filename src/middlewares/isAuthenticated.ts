@@ -28,6 +28,7 @@ export async function isAuthenticated(
         ACCESS_TOKEN_SECRET as string
       ) as JwtPayload;
       req.user = payload.user;
+
       next();
     } catch (error) {
       // Explicitly assert the error as `Error` type
