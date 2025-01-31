@@ -320,6 +320,83 @@ export async function sendInvitationToClient(req: Request, res: Response) {
   }
 }
 
+// PATCH: cancel invitation to client
+export async function cancelInvitationToClient(req: Request, res: Response) {
+  try {
+    const projectId = req.params.projectId;
+    const { clientId } = req.body;
+    const managerId = req.user?._id;
+
+    if (!projectId || !clientId) {
+      return res.status(400).json({
+        message: 'Project ID and Client ID are required',
+      });
+    }
+
+    // Find project and client
+    const [project, client] = await Promise.all([
+      ProjectModel.findOne({ _id: projectId, projectManager: managerId }),
+      ClientModel.findOne({ clientId }),
+    ]);
+
+    if (!project || !client) {
+      return res.status(404).json({
+        message: 'Project or Client not found',
+      });
+    }
+
+    const projectObjectId = project._id;
+
+    // Check if client has pending invitation
+    const checks = {
+      hasPendingInvitation: false,
+      isRequested: false,
+    };
+
+    checks.hasPendingInvitation = client.projectInvitations.some((id) =>
+      id.equals(projectObjectId)
+    );
+    checks.isRequested = project.requestedClientList.some((id) =>
+      id.equals(client._id)
+    );
+
+    if (!checks.hasPendingInvitation || !checks.isRequested) {
+      return res.status(400).json({
+        message: 'No pending invitation found for this client',
+      });
+    }
+
+    // Remove invitation from both client and project
+    const [updatedClient, updatedProject] = await Promise.all([
+      ClientModel.findOneAndUpdate(
+        { email: client.email },
+        {
+          $pull: { projectInvitations: projectObjectId },
+          hasProjectInvitation: client.projectInvitations.length <= 1,
+        },
+        { new: true }
+      ),
+      ProjectModel.findByIdAndUpdate(
+        projectObjectId,
+        {
+          $pull: { requestedClientList: client._id },
+        },
+        { new: true }
+      ),
+    ]);
+
+    return res.status(200).json({
+      message: 'Invitation cancelled successfully',
+      client: updatedClient,
+      project: updatedProject,
+    });
+  } catch (error) {
+    const errorMessage =
+      error instanceof Error ? error.message : 'Failed to cancel invitation';
+    return res.status(500).json({ message: errorMessage });
+  }
+}
+
 // DELETE: delete project
 export async function deleteProject(req: Request, res: Response) {
   try {

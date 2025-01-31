@@ -1,6 +1,7 @@
 import express from 'express';
 
 import {
+  cancelInvitationToClient,
   createNewProject,
   deleteProject,
   getProjectDetails,
@@ -52,6 +53,13 @@ router.patch(
   isAuthenticated,
   hasPermission(ROLE.PROJECT_MANAGER),
   sendInvitationToClient
+);
+// cancel invitation to client
+router.patch(
+  '/projects/cancelInvitation/:projectId',
+  isAuthenticated,
+  hasPermission(ROLE.PROJECT_MANAGER),
+  cancelInvitationToClient
 );
 
 // DELETE:
