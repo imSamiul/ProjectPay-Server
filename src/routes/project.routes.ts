@@ -5,6 +5,7 @@ import {
   createNewProject,
   deleteProject,
   getProjectDetails,
+  removeClientFromProject,
   searchProject,
   sendInvitationToClient,
   updateProjectDetails,
@@ -60,6 +61,13 @@ router.patch(
   isAuthenticated,
   hasPermission(ROLE.PROJECT_MANAGER),
   cancelInvitationToClient
+);
+// remove client from project
+router.patch(
+  '/projects/removeClient/:projectId',
+  isAuthenticated,
+  hasPermission(ROLE.PROJECT_MANAGER),
+  removeClientFromProject
 );
 
 // DELETE:

@@ -229,7 +229,6 @@ export async function updateProjectDetails(req: Request, res: Response) {
   }
 }
 //PATCH: handle send invitation to a client to join a project
-
 export async function sendInvitationToClient(req: Request, res: Response) {
   try {
     const { clientId } = req.body;
@@ -369,7 +368,7 @@ export async function cancelInvitationToClient(req: Request, res: Response) {
     // Remove invitation from both client and project
     const [updatedClient, updatedProject] = await Promise.all([
       ClientModel.findOneAndUpdate(
-        { email: client.email },
+        { _id: client._id },
         {
           $pull: { projectInvitations: projectObjectId },
           hasProjectInvitation: client.projectInvitations.length <= 1,
@@ -394,6 +393,78 @@ export async function cancelInvitationToClient(req: Request, res: Response) {
     const errorMessage =
       error instanceof Error ? error.message : 'Failed to cancel invitation';
     return res.status(500).json({ message: errorMessage });
+  }
+}
+
+// PATCH: remove client from project
+export async function removeClientFromProject(req: Request, res: Response) {
+  try {
+    const projectId = req.params.projectId;
+    const clientId = req.body.clientId;
+    const managerId = req.user?._id;
+
+    if (!projectId || !clientId) {
+      return res.status(400).json({
+        message: 'Project ID and Client ID are required',
+      });
+    }
+    // Find project and client
+    const [project, client] = await Promise.all([
+      ProjectModel.findOne({ _id: projectId, projectManager: managerId }),
+      ClientModel.findOne({ _id: clientId }),
+    ]);
+    if (!project || !client) {
+      return res.status(404).json({
+        message: 'Project or Client not found',
+      });
+    }
+
+    const projectObjectId = project._id;
+
+    // Check if client has pending invitation
+    const checks = {
+      isInApprovedClientList: false,
+      isInClientProjects: false,
+    };
+
+    checks.isInApprovedClientList = project.approvedClientList.some((id) =>
+      id.equals(client._id)
+    );
+    checks.isInClientProjects = client.clientProjects.some((id) =>
+      id.equals(projectObjectId)
+    );
+
+    if (!checks.isInApprovedClientList || !checks.isInClientProjects) {
+      return res.status(400).json({
+        message: 'Client is not in the approved list',
+      });
+    }
+
+    // Remove client from project
+    const [updatedClient, updatedProject] = await Promise.all([
+      ClientModel.findOneAndUpdate(
+        { _id: client._id },
+        { $pull: { clientProjects: projectObjectId } },
+        { new: true }
+      ),
+      ProjectModel.findByIdAndUpdate(
+        projectObjectId,
+        { $pull: { approvedClientList: client._id } },
+        { new: true }
+      ),
+    ]);
+
+    return res.status(200).json({
+      message: 'Client removed successfully',
+      client: updatedClient,
+      project: updatedProject,
+    });
+  } catch (error) {
+    let errorMessage = 'Failed to remove client from project';
+    if (error instanceof Error) {
+      errorMessage = error.message;
+    }
+    res.status(500).json({ message: errorMessage });
   }
 }
 
