@@ -33,6 +33,8 @@ export async function isAuthenticated(
     } catch (error) {
       // Explicitly assert the error as `Error` type
       if (error instanceof jwt.TokenExpiredError) {
+        // clear the cookie and send a message to the client
+        res.clearCookie('refreshToken');
         return res
           .status(401)
           .json({ error: 'Session timed out, please login again' });

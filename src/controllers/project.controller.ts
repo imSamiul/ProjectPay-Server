@@ -468,6 +468,98 @@ export async function removeClientFromProject(req: Request, res: Response) {
   }
 }
 
+// PATCH: accept project invitation to access the project
+export async function acceptProjectInvitation(req: Request, res: Response) {
+  try {
+    const { projectId } = req.params;
+    const clientId = req.user?._id;
+
+    const [client, project, manager] = await Promise.all([
+      // Update client
+      ClientModel.findOneAndUpdate(
+        { _id: clientId },
+        {
+          $pull: { projectInvitations: projectId },
+          $push: { clientProjects: projectId },
+          $set: { hasProjectInvitation: false },
+        },
+        { new: true }
+      ),
+      // Update project
+      ProjectModel.findOneAndUpdate(
+        { _id: projectId },
+        {
+          $push: { approvedClientList: clientId },
+          $pull: { requestedClientList: clientId },
+        },
+        { new: true }
+      ),
+      // Update manager
+      ProjectModel.findOne({ _id: projectId }).then((project) =>
+        ProjectManagerModel.findOneAndUpdate(
+          { _id: project?.projectManager },
+          { $push: { clientList: clientId } },
+          { new: true }
+        )
+      ),
+    ]);
+
+    if (!client) {
+      return res.status(404).json({ message: 'Client not found' });
+    }
+    if (!project) {
+      return res.status(404).json({ message: 'Project not found' });
+    }
+
+    res.status(200).json({ client, project, manager });
+  } catch (error) {
+    let errorMessage = 'Failed to update project status';
+    if (error instanceof Error) {
+      errorMessage = error.message;
+    }
+    res.status(500).json({
+      message: errorMessage,
+    });
+  }
+}
+
+// PATCH: reject project invitation
+export async function rejectProjectInvitation(req: Request, res: Response) {
+  try {
+    const { projectId } = req.params;
+    const clientId = req.user?._id;
+    const [client, project] = await Promise.all([
+      ClientModel.findOneAndUpdate(
+        { _id: clientId },
+        { $pull: { projectInvitations: projectId } },
+        { new: true }
+      ),
+      ProjectModel.findOneAndUpdate(
+        { _id: projectId },
+        { $pull: { requestedClientList: clientId } },
+        { new: true }
+      ),
+    ]);
+
+    if (!client) {
+      return res.status(404).json({ message: 'Client not found' });
+    }
+    if (!project) {
+      return res.status(404).json({ message: 'Project not found' });
+    }
+
+    res.status(200).json({ client, project });
+  } catch (error) {
+    let errorMessage = 'Failed to reject project invitation';
+    if (error instanceof Error) {
+      errorMessage = error.message;
+    }
+    res.status(500).json({
+      message: errorMessage,
+    });
+  }
+}
+
 // DELETE: delete project
 export async function deleteProject(req: Request, res: Response) {
   try {

@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import Client from '../models/client.model';
-import { User } from '../types/user.type';
 import UserModel from '../models/user.model';
+import { User } from '../types/user.type';
 
 // GET: Get all clients
 export async function getClientList(req: Request, res: Response) {
@@ -22,6 +22,7 @@ export async function getUserDetails(req: Request, res: Response) {
     const user = req.user;
 
     const findUser = await UserModel.findById((user as User)._id);
+
     if (!user) {
       return res.status(200).json({ user: null });
     }

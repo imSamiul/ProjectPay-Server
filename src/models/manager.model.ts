@@ -12,7 +12,7 @@ const managerSchema = new Schema<Manager, ManagerModel, ManagerMethods>({
   clientList: [
     {
       type: Schema.Types.ObjectId,
-      ref: 'Client',
+      ref: 'User',
     },
   ],
 });

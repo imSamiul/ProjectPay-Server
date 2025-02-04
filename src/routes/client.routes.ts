@@ -1,7 +1,7 @@
 import express from 'express';
 import {
-  acceptProjectInvitation,
-  getClientInvitations,
+  getClientProjects,
+  getRequestedProjects,
   searchClient,
 } from '../controllers/client.controller';
 import { hasPermission, ROLE } from '../middlewares/hasPermission';
@@ -17,23 +17,25 @@ router.get(
   hasPermission(ROLE.PROJECT_MANAGER),
   searchClient
 );
-// Get all invitations of a project for a client
+
+// get client projects
 router.get(
-  '/clients/invitations',
+  '/client-projects',
   isAuthenticated,
   hasPermission(ROLE.CLIENT),
-  getClientInvitations
+  getClientProjects
 );
 
+// get requested projects
+router.get(
+  '/requested-projects',
+  isAuthenticated,
+  hasPermission(ROLE.CLIENT),
+  getRequestedProjects
+);
 // POST:
 // PATCH:
 
-router.patch(
-  '/clients/acceptProjectInvitation/:projectId',
-  isAuthenticated,
-  hasPermission(ROLE.CLIENT),
-  acceptProjectInvitation
-);
 // DELETE:
 
 export default router;

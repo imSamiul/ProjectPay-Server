@@ -1,10 +1,12 @@
 import express from 'express';
 
 import {
+  acceptProjectInvitation,
   cancelInvitationToClient,
   createNewProject,
   deleteProject,
   getProjectDetails,
+  rejectProjectInvitation,
   removeClientFromProject,
   searchProject,
   sendInvitationToClient,
@@ -81,10 +83,24 @@ router.delete(
 // ------------- FOR CLIENT: -------------
 // GET:
 
-// PATCH:
-
+//  PATCH:
+// accept invite
+router.patch(
+  '/projects/acceptInvite/:projectId',
+  isAuthenticated,
+  hasPermission(ROLE.CLIENT),
+  acceptProjectInvitation
+);
+// reject invite
+router.patch(
+  '/projects/rejectInvite/:projectId',
+  isAuthenticated,
+  hasPermission(ROLE.CLIENT),
+  rejectProjectInvitation
+);
 // ------------ FOR BOTH: ------------
 // GET:
+
 router.get(
   '/projects/details/:projectCode',
   isAuthenticated,
