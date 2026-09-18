@@ -6,12 +6,10 @@ dist/
 build/
 *.tsbuildinfo
 
-# Environment / secrets
+# Environment / secrets (keep .env.example tracked)
 .env
 .env.*
-config/*.env
 !.env.example
-!config/.env.example
 
 # Logs
 logs/

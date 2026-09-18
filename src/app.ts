@@ -1,39 +1,36 @@
-import express from 'express';
-import cors from 'cors';
-import userRoutes from './routes/userRoutes';
-import projectRoutes from './routes/projectRoutes';
-import managerRoutes from './routes/managerRoutes';
-import paymentRoutes from './routes/paymentRoutes';
-import path from 'path';
-import dotenv from 'dotenv';
-import connectDB from './db/mongoose';
+import express, { Express } from "express";
+import cors from "cors";
+import helmet from "helmet";
+import routes from "./routes";
+import { errorHandler } from "./middleware/error-handler";
+import { notFound } from "./middleware/not-found";
+import { requestLogger } from "./middleware/request-logger";
 
-dotenv.config({
-  path: path.resolve(__dirname, '../config/dev.env'),
-});
+export function createApp(): Express {
+  const app = express();
 
-connectDB();
+  app.use(helmet());
+  app.use(
+    cors({
+      origin: process.env.CLIENT_ORIGIN ?? "http://localhost:5173",
+      credentials: true,
+    }),
+  );
+  app.use(express.json());
+  app.use(express.urlencoded({ extended: true }));
+  app.use(requestLogger);
 
-const app = express();
-const corsOptions = {
-  origin: '*',
-  credentials: true,
-  optionSuccessStatus: 200,
-};
+  app.get("/", (_req, res) => {
+    res.send("Express on Vercel");
+  });
 
-app.use(cors(corsOptions));
+  app.get("/api/v1/health", (_req, res) => {
+    res.json({ success: true, status: "ok" });
+  });
 
-app.use(express.json());
-app.use(userRoutes);
-app.use(projectRoutes);
-app.use(managerRoutes);
-app.use(paymentRoutes);
+  app.use("/api/v1", routes);
+  app.use(notFound);
+  app.use(errorHandler);
 
-const port = process.env.PORT;
-app.get('/', (req, res) => res.send('Express on Vercel'));
-
-app.listen(port, () => {
-  console.log(`Server is up on port ${port}`);
-});
-
-export default app;
+  return app;
+}

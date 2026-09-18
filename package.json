@@ -1,13 +1,14 @@
 {
-  "name": "topupayserver",
+  "name": "project-pay-server",
   "version": "1.0.0",
   "description": "Project Pay app backend",
-  "main": "index.js",
+  "main": "dist/src/server.js",
   "license": "MIT",
   "scripts": {
-    "build": "npx tsc",
-    "start": "node dist/index.js",
-    "dev": "nodemon src/app.ts"
+    "build": "tsc",
+    "start": "node dist/src/server.js",
+    "dev": "nodemon src/server.ts",
+    "create-admin": "ts-node src/scripts/create-admin.ts"
   },
   "dependencies": {
     "@types/uuid": "^10.0.0",
@@ -15,14 +16,16 @@
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.21.0",
-    "fuse.js": "^7.0.0",
+    "express-rate-limit": "^8.7.0",
+    "helmet": "^8.3.0",
     "jsonwebtoken": "^9.0.2",
-    "mongodb": "^6.9.0",
     "mongoose": "^8.6.3",
+    "pino": "^10.3.1",
     "ts-node": "^10.9.2",
     "typescript": "^5.6.2",
     "uuid": "^10.0.0",
-    "validator": "^13.12.0"
+    "validator": "^13.12.0",
+    "zod": "^4.6.5"
   },
   "devDependencies": {
     "@eslint/js": "^9.11.0",
