@@ -1,0 +1,37 @@
+meta {
+  name: Search projects
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/projects/search?q=Acme&pageParam=1&limit=20
+  body: none
+  auth: inherit
+}
+
+params:query {
+  q: Acme
+  pageParam: 1
+  limit: 20
+}
+
+docs {
+  # GET /api/v1/projects/search
+
+  Case-insensitive search on `name` and `projectCode` for the current manager.
+
+  ## Query
+  | Param | Required | Default | Max |
+  | --- | --- | --- | --- |
+  | q | yes | — | — |
+  | pageParam | no | 1 | — |
+  | limit | no | 20 | 50 |
+
+  ## Example response `200`
+  Same shape as `GET /manager/projects` (`projects` + `pagination`).
+}
+
+assert {
+  res.status: eq 200
+}

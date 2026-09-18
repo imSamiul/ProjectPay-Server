@@ -1,0 +1,48 @@
+meta {
+  name: Update project details
+  type: http
+  seq: 5
+}
+
+patch {
+  url: {{baseUrl}}/projects/updateProjectDetails/{{projectCode}}
+  body: json
+  auth: inherit
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "name": "Acme Landing Page (Revised)",
+    "budget": 120000,
+    "advance": 25000,
+    "clientName": "Acme Ltd",
+    "clientPhone": "+8801711222333",
+    "clientEmail": "billing@acme.test",
+    "clientAddress": "Dhaka, Bangladesh",
+    "clientDetails": "Primary contact: Rahim",
+    "endDate": "2026-07-31",
+    "demoLink": "https://demo.example.com/acme-v2",
+    "typeOfWeb": "Marketing site",
+    "description": "Updated scope with blog section"
+  }
+}
+
+docs {
+  # PATCH /api/v1/projects/updateProjectDetails/:projectCode
+
+  Partial update of project fields. All body fields are optional but at least one should be sent.
+
+  Allowed: `name`, `budget`, `advance`, `clientName`, `clientPhone`, `clientEmail`,
+  `clientAddress`, `clientDetails`, `endDate`, `demoLink`, `typeOfWeb`, `description`
+
+  ## Example response `200`
+  Updated project document.
+}
+
+assert {
+  res.status: eq 200
+}

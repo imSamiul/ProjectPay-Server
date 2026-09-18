@@ -1,0 +1,77 @@
+meta {
+  name: Create project
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/projects/create
+  body: json
+  auth: inherit
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "name": "Acme Landing Page",
+    "budget": 100000,
+    "advance": 20000,
+    "clientName": "Acme Ltd",
+    "clientPhone": "+8801711222333",
+    "clientEmail": "billing@acme.test",
+    "clientAddress": "Dhaka",
+    "clientDetails": "Primary contact: Rahim",
+    "startDate": "2026-03-01",
+    "endDate": "2026-06-30",
+    "demoLink": "https://demo.example.com/acme",
+    "typeOfWeb": "Marketing site",
+    "description": "Responsive landing page with CMS",
+    "status": false
+  }
+}
+
+docs {
+  # POST /api/v1/projects/create
+
+  Creates a project owned by the authenticated manager.
+  Server generates `projectCode` and sets `due = budget - advance`.
+
+  ## Body (required)
+  `name`, `budget`, `advance`, `clientName`, `clientPhone`, `clientEmail`, `startDate`, `endDate`
+
+  ## Optional
+  `clientAddress`, `clientDetails`, `demoLink`, `typeOfWeb`, `description`, `status`
+
+  ## Example response `201`
+  ```json
+  {
+    "_id": "66f0abc...",
+    "projectCode": "a1b2c3d4",
+    "name": "Acme Landing Page",
+    "budget": 100000,
+    "advance": 20000,
+    "due": 80000,
+    "totalPaid": 0,
+    "status": false,
+    "projectManager": "66f0mgr..."
+  }
+  ```
+
+  ## Errors
+  - `409` project name already exists
+  - `403` not a project manager
+}
+
+script:post-response {
+  if (res.status === 201) {
+    if (res.body._id) bru.setEnvVar("projectId", res.body._id);
+    if (res.body.projectCode) bru.setEnvVar("projectCode", res.body.projectCode);
+  }
+}
+
+assert {
+  res.status: in [201, 409]
+}

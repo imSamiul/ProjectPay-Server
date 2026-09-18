@@ -1,0 +1,35 @@
+meta {
+  name: Delete user
+  type: http
+  seq: 4
+}
+
+delete {
+  url: {{baseUrl}}/admin/users/{{userId}}
+  body: none
+  auth: inherit
+}
+
+docs {
+  # DELETE /api/v1/admin/users/:userId
+
+  Permanently deletes a non-admin user.
+  Run **List users** first so `{{userId}}` is set to the first non-admin.
+
+  ## Example response `200`
+  ```json
+  {
+    "id": "66f0..."
+  }
+  ```
+
+  ## Errors
+  - `400` cannot delete yourself / another admin
+  - `404` user not found
+
+  ⚠️ Destructive — only run against disposable test accounts.
+}
+
+assert {
+  res.status: in [200, 400, 404]
+}

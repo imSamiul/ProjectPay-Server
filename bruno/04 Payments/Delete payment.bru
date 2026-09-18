@@ -1,0 +1,29 @@
+meta {
+  name: Delete payment
+  type: http
+  seq: 3
+}
+
+delete {
+  url: {{baseUrl}}/payment/delete/{{paymentId}}
+  body: none
+  auth: inherit
+}
+
+docs {
+  # DELETE /api/v1/payment/delete/:paymentId
+
+  Removes the payment and recalculates project totals.
+
+  ## Example response `200`
+  ```json
+  {
+    "payment": { "_id": "66f0pay..." },
+    "updatedProject": { "_id": "66f0abc...", "totalPaid": 0, "due": 80000 }
+  }
+  ```
+}
+
+assert {
+  res.status: in [200, 404]
+}

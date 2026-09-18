@@ -1,0 +1,62 @@
+meta {
+  name: List all projects
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/admin/projects?pageParam=1&limit=20
+  body: none
+  auth: inherit
+}
+
+params:query {
+  pageParam: 1
+  limit: 20
+}
+
+docs {
+  # GET /api/v1/admin/projects
+
+  All projects across managers (paginated).
+
+  ## Query
+  | Param | Default | Max |
+  | --- | --- | --- |
+  | pageParam | 1 | — |
+  | limit | 20 | 50 |
+
+  ## Example response `200`
+  ```json
+  {
+    "projects": [
+      {
+        "_id": "66f0abc...",
+        "projectCode": "a1b2c3d4",
+        "name": "Acme Landing Page",
+        "budget": 100000,
+        "due": 50000,
+        "totalPaid": 30000,
+        "status": false,
+        "clientName": "Acme Ltd",
+        "projectManager": {
+          "_id": "66f0mgr...",
+          "name": "Demo Manager",
+          "email": "manager@example.com"
+        },
+        "createdAt": "2026-03-01T12:00:00.000Z"
+      }
+    ],
+    "pagination": {
+      "page": 1,
+      "limit": 20,
+      "total": 58,
+      "totalPages": 3
+    }
+  }
+  ```
+}
+
+assert {
+  res.status: eq 200
+}

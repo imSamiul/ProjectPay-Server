@@ -1,0 +1,39 @@
+meta {
+  name: Get platform stats
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/admin/stats
+  body: none
+  auth: inherit
+}
+
+docs {
+  # GET /api/v1/admin/stats
+
+  Platform-wide aggregates for the admin dashboard.
+
+  ## Example response `200`
+  ```json
+  {
+    "users": {
+      "total": 42,
+      "clients": 30,
+      "projectManagers": 11,
+      "admins": 1
+    },
+    "projects": {
+      "total": 58,
+      "totalBudget": 9200000,
+      "totalDue": 2100000,
+      "totalCollected": 5400000
+    }
+  }
+  ```
+}
+
+assert {
+  res.status: eq 200
+}

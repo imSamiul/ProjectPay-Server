@@ -1,0 +1,54 @@
+meta {
+  name: Sign up client
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/user/signUp
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "name": "Demo Client",
+    "email": "{{clientEmail}}",
+    "phone": "+8801711000002",
+    "password": "{{clientPassword}}",
+    "userType": "client"
+  }
+}
+
+docs {
+  # POST /api/v1/user/signUp (client)
+
+  Same endpoint as manager sign-up with `userType: "client"`.
+
+  ## Example response `201`
+  ```json
+  {
+    "user": {
+      "_id": "66f0...",
+      "name": "Demo Client",
+      "email": "client@example.com",
+      "userType": "client"
+    },
+    "token": "eyJhbGciOiJIUzI1NiIs..."
+  }
+  ```
+}
+
+script:post-response {
+  if (res.status === 201 && res.body.token) {
+    bru.setEnvVar("token", res.body.token);
+  }
+}
+
+assert {
+  res.status: in [201, 409]
+}

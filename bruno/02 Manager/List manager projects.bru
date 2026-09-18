@@ -1,0 +1,66 @@
+meta {
+  name: List manager projects
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/manager/projects?pageParam=1&limit=10
+  body: none
+  auth: inherit
+}
+
+params:query {
+  pageParam: 1
+  limit: 10
+}
+
+docs {
+  # GET /api/v1/manager/projects
+
+  Paginated list of projects owned by the manager.
+
+  ## Query
+  | Param | Default | Max |
+  | --- | --- | --- |
+  | pageParam | 1 | — |
+  | limit | 10 | 50 |
+
+  ## Example response `200`
+  ```json
+  {
+    "projects": [
+      {
+        "_id": "66f0...",
+        "projectCode": "a1b2c3d4",
+        "name": "Acme Landing",
+        "budget": 100000,
+        "advance": 20000,
+        "due": 50000,
+        "totalPaid": 30000,
+        "status": false,
+        "clientName": "Acme Ltd",
+        "clientEmail": "billing@acme.test"
+      }
+    ],
+    "pagination": {
+      "page": 1,
+      "limit": 10,
+      "total": 12,
+      "totalPages": 2
+    }
+  }
+  ```
+}
+
+script:post-response {
+  if (res.status === 200 && res.body.projects && res.body.projects.length > 0) {
+    const first = res.body.projects[0];
+    if (first._id) bru.setEnvVar("projectId", first._id);
+    if (first.projectCode) bru.setEnvVar("projectCode", first.projectCode);
+  }
+}
+
+assert {
+  res.status: eq 200
+}

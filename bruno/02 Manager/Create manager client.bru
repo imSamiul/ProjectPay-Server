@@ -1,0 +1,55 @@
+meta {
+  name: Create manager client
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}/manager/clients
+  body: json
+  auth: inherit
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "clientName": "Acme Ltd",
+    "clientPhone": "+8801711222333",
+    "clientEmail": "billing@acme.test"
+  }
+}
+
+docs {
+  # POST /api/v1/manager/clients
+
+  Creates a client user and links them to the manager.
+  If `password` is omitted, a temporary password is generated and returned.
+
+  ## Body
+  | Field | Required | Notes |
+  | --- | --- | --- |
+  | clientName | yes | |
+  | clientPhone | yes | |
+  | clientEmail | yes | unique |
+  | password | no | min 6 if provided |
+
+  ## Example response `201`
+  ```json
+  {
+    "client": {
+      "id": "66f0...",
+      "clientName": "Acme Ltd",
+      "clientEmail": "billing@acme.test",
+      "clientPhone": "+8801711222333",
+      "temporaryPassword": "a8f3c2d1e9"
+    }
+  }
+  ```
+}
+
+assert {
+  res.status: in [201, 409]
+}

@@ -1,0 +1,29 @@
+meta {
+  name: Delete project
+  type: http
+  seq: 6
+}
+
+delete {
+  url: {{baseUrl}}/projects/delete/{{projectId}}
+  body: none
+  auth: inherit
+}
+
+docs {
+  # DELETE /api/v1/projects/delete/:projectId
+
+  Permanently deletes the project and its payments.
+  Uses Mongo `_id` (`{{projectId}}`), not `projectCode`.
+
+  ## Example response `200`
+  Deleted project document.
+
+  ## Errors
+  - `404` not found
+  - `403` not the owner
+}
+
+assert {
+  res.status: in [200, 404]
+}

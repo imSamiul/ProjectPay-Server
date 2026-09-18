@@ -1,0 +1,49 @@
+meta {
+  name: Update payment
+  type: http
+  seq: 2
+}
+
+patch {
+  url: {{baseUrl}}/payment/update/{{paymentId}}
+  body: json
+  auth: inherit
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "projectId": "{{projectId}}",
+    "paymentAmount": 18000,
+    "paymentMethod": "Bank Transfer",
+    "transactionId": "TXN-DEMO-001-R",
+    "paymentDate": "2026-03-16T10:00:00.000Z"
+  }
+}
+
+docs {
+  # PATCH /api/v1/payment/update/:paymentId
+
+  Updates an existing payment and recalculates project totals.
+
+  ## Path
+  - `paymentId` — from Add Payment (`{{paymentId}}`)
+
+  ## Body
+  Same fields as Add Payment (`projectId`, `paymentAmount`, `paymentMethod`, `transactionId`, `paymentDate`).
+
+  ## Example response `200`
+  ```json
+  {
+    "updatedPayment": { "_id": "66f0pay...", "paymentAmount": 18000 },
+    "updatedProject": { "_id": "66f0abc...", "totalPaid": 18000, "due": 62000 }
+  }
+  ```
+}
+
+assert {
+  res.status: in [200, 404]
+}

@@ -1,0 +1,34 @@
+meta {
+  name: Logout
+  type: http
+  seq: 6
+}
+
+post {
+  url: {{baseUrl}}/user/logout
+  body: none
+  auth: inherit
+}
+
+docs {
+  # POST /api/v1/user/logout
+
+  Invalidates the current JWT on the server (removes it from the user token list).
+
+  ## Example response `200`
+  ```
+  Logged out successfully
+  ```
+
+  After logout, clear or refresh `token` before calling protected routes again.
+}
+
+script:post-response {
+  if (res.status === 200) {
+    bru.setEnvVar("token", "");
+  }
+}
+
+assert {
+  res.status: eq 200
+}

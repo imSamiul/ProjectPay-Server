@@ -1,0 +1,67 @@
+meta {
+  name: List users
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/admin/users?pageParam=1&limit=20
+  body: none
+  auth: inherit
+}
+
+params:query {
+  pageParam: 1
+  limit: 20
+  ~role: client
+}
+
+docs {
+  # GET /api/v1/admin/users
+
+  Paginated users. Optional `role` filter.
+
+  ## Query
+  | Param | Default | Notes |
+  | --- | --- | --- |
+  | pageParam | 1 | |
+  | limit | 20 | max 50 |
+  | role | — | `client` \| `project manager` \| `admin` |
+
+  Enable the `role` query param in Bruno to filter.
+
+  ## Example response `200`
+  ```json
+  {
+    "users": [
+      {
+        "id": "66f0...",
+        "name": "Demo Client",
+        "email": "client@example.com",
+        "phone": "+8801711000002",
+        "userType": "client",
+        "createdAt": "2026-03-01T12:00:00.000Z"
+      }
+    ],
+    "pagination": {
+      "page": 1,
+      "limit": 20,
+      "total": 30,
+      "totalPages": 2
+    }
+  }
+  ```
+}
+
+script:post-response {
+  if (res.status === 200 && res.body.users && res.body.users.length > 0) {
+    const nonAdmin = res.body.users.find((u) => u.userType !== "admin");
+    if (nonAdmin && nonAdmin.id) {
+      bru.setEnvVar("userId", nonAdmin.id);
+    }
+  }
+}
+
+assert {
+  res.status: eq 200
+}

@@ -1,0 +1,69 @@
+meta {
+  name: Add payment
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/payment/add
+  body: json
+  auth: inherit
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "projectId": "{{projectId}}",
+    "paymentAmount": 15000,
+    "paymentMethod": "bKash",
+    "transactionId": "TXN-DEMO-001",
+    "paymentDate": "2026-03-15T10:00:00.000Z"
+  }
+}
+
+docs {
+  # POST /api/v1/payment/add
+
+  Records a payment and recalculates project `totalPaid` / `due`.
+
+  ## Body
+  | Field | Type | Notes |
+  | --- | --- | --- |
+  | projectId | string | Mongo `_id` |
+  | paymentAmount | number | must be > 0 |
+  | paymentMethod | string | e.g. bKash, bank |
+  | transactionId | string | optional |
+  | paymentDate | ISO date | e.g. `2026-03-15T10:00:00.000Z` |
+
+  ## Example response `201`
+  ```json
+  {
+    "payment": {
+      "_id": "66f0pay...",
+      "projectId": "66f0abc...",
+      "paymentAmount": 15000,
+      "paymentMethod": "bKash",
+      "transactionId": "TXN-DEMO-001",
+      "paymentDate": "2026-03-15T10:00:00.000Z"
+    },
+    "project": {
+      "_id": "66f0abc...",
+      "totalPaid": 15000,
+      "due": 65000
+    }
+  }
+  ```
+}
+
+script:post-response {
+  if (res.status === 201 && res.body.payment && res.body.payment._id) {
+    bru.setEnvVar("paymentId", res.body.payment._id);
+  }
+}
+
+assert {
+  res.status: in [201, 400]
+}

@@ -1,0 +1,40 @@
+meta {
+  name: Get current user
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{baseUrl}}/user/me
+  body: none
+  auth: inherit
+}
+
+docs {
+  # GET /api/v1/user/me
+
+  Returns the authenticated user (password/tokens stripped).
+
+  ## Headers
+  `Authorization: Bearer {{token}}`
+
+  ## Example response `200`
+  ```json
+  {
+    "user": {
+      "_id": "66f0...",
+      "name": "Demo Manager",
+      "email": "manager@example.com",
+      "phone": "+8801711000001",
+      "userType": "project manager"
+    }
+  }
+  ```
+
+  ## Errors
+  - `401` missing/invalid token
+}
+
+assert {
+  res.status: eq 200
+}

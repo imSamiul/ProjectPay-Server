@@ -1,0 +1,39 @@
+meta {
+  name: Update project status
+  type: http
+  seq: 4
+}
+
+patch {
+  url: {{baseUrl}}/projects/updateProjectStatus/{{projectCode}}
+  body: json
+  auth: inherit
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "status": true
+  }
+}
+
+docs {
+  # PATCH /api/v1/projects/updateProjectStatus/:projectCode
+
+  Mark a project done (`true`) or active (`false`).
+
+  ## Body
+  ```json
+  { "status": true }
+  ```
+
+  ## Example response `200`
+  Updated project document (includes `projectCode`, `status`, …).
+}
+
+assert {
+  res.status: eq 200
+}

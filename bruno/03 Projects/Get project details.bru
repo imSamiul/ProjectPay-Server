@@ -1,0 +1,52 @@
+meta {
+  name: Get project details
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/projects/details/{{projectCode}}
+  body: none
+  auth: inherit
+}
+
+docs {
+  # GET /api/v1/projects/details/:projectCode
+
+  Full project with populated `projectManager` and `paymentList`.
+
+  ## Path
+  - `projectCode` — from Create Project / List Projects (`{{projectCode}}`)
+
+  ## Example response `200`
+  ```json
+  {
+    "_id": "66f0abc...",
+    "projectCode": "a1b2c3d4",
+    "name": "Acme Landing Page",
+    "budget": 100000,
+    "due": 50000,
+    "totalPaid": 30000,
+    "projectManager": {
+      "_id": "66f0mgr...",
+      "name": "Demo Manager",
+      "email": "manager@example.com"
+    },
+    "paymentList": [
+      {
+        "_id": "66f0pay...",
+        "paymentAmount": 30000,
+        "paymentMethod": "bKash",
+        "paymentDate": "2026-03-15T00:00:00.000Z"
+      }
+    ]
+  }
+  ```
+
+  ## Errors
+  - `404` project not found / not owned by you
+}
+
+assert {
+  res.status: eq 200
+}

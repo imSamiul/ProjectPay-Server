@@ -1,0 +1,44 @@
+meta {
+  name: Login as admin
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}/user/login
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "email": "{{adminEmail}}",
+    "password": "{{adminPassword}}"
+  }
+}
+
+docs {
+  # POST /api/v1/user/login (admin)
+
+  Login with an admin account created via:
+
+  ```bash
+  pnpm run create-admin -- --name "Test Admin" --email admin@test.com --phone "+8801700000000" --password secret123
+  ```
+
+  Saves `token` for Admin folder requests.
+}
+
+script:post-response {
+  if (res.status === 201 && res.body.token) {
+    bru.setEnvVar("token", res.body.token);
+  }
+}
+
+assert {
+  res.status: eq 201
+}

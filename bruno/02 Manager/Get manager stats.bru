@@ -1,0 +1,42 @@
+meta {
+  name: Get manager stats
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/manager/stats
+  body: none
+  auth: inherit
+}
+
+docs {
+  # GET /api/v1/manager/stats
+
+  Aggregated dashboard stats for the logged-in manager.
+
+  ## Example response `200`
+  ```json
+  {
+    "projects": {
+      "total": 12,
+      "active": 7,
+      "completed": 3,
+      "overdue": 2,
+      "totalBudget": 1500000,
+      "totalDue": 420000,
+      "totalCollected": 880000
+    },
+    "clients": {
+      "total": 5
+    }
+  }
+  ```
+
+  - `active` = not completed and not overdue
+  - `overdue` = open, due > 0, endDate before today
+}
+
+assert {
+  res.status: eq 200
+}

@@ -1,0 +1,46 @@
+meta {
+  name: List manager clients
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/manager/clients?pageParam=1&limit=10
+  body: none
+  auth: inherit
+}
+
+params:query {
+  pageParam: 1
+  limit: 10
+}
+
+docs {
+  # GET /api/v1/manager/clients
+
+  Clients created by / linked to this manager.
+
+  ## Example response `200`
+  ```json
+  {
+    "clients": [
+      {
+        "id": "66f0...",
+        "clientName": "Acme Ltd",
+        "clientEmail": "billing@acme.test",
+        "clientPhone": "+8801711222333"
+      }
+    ],
+    "pagination": {
+      "page": 1,
+      "limit": 10,
+      "total": 1,
+      "totalPages": 1
+    }
+  }
+  ```
+}
+
+assert {
+  res.status: eq 200
+}

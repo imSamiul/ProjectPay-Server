@@ -1,0 +1,62 @@
+meta {
+  name: Login as project manager
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/user/login
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "email": "{{managerEmail}}",
+    "password": "{{managerPassword}}"
+  }
+}
+
+docs {
+  # POST /api/v1/user/login
+
+  Exchange email/password for a JWT. Saves `token` on success.
+
+  ## Body
+  ```json
+  {
+    "email": "manager@example.com",
+    "password": "secret123"
+  }
+  ```
+
+  ## Example response `201`
+  ```json
+  {
+    "user": {
+      "_id": "66f0...",
+      "name": "Demo Manager",
+      "email": "manager@example.com",
+      "userType": "project manager"
+    },
+    "token": "eyJhbGciOiJIUzI1NiIs..."
+  }
+  ```
+
+  ## Errors
+  - `400` invalid email or password
+}
+
+script:post-response {
+  if (res.status === 201 && res.body.token) {
+    bru.setEnvVar("token", res.body.token);
+  }
+}
+
+assert {
+  res.status: eq 201
+}
