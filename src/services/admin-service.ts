@@ -1,6 +1,16 @@
 import Project from "../models/project-model";
 import User from "../models/user-model";
-import { BadRequestError, NotFoundError } from "../utils/app-error";
+// Ensure discriminator schemas are registered
+import "../models/client-model";
+import "../models/manager-model";
+import {
+  BadRequestError,
+  ConflictError,
+  NotFoundError,
+  UnauthorizedError,
+} from "../utils/app-error";
+import { UserType } from "../types/user-type";
+
 
 type UserRole = "client" | "project manager" | "admin";
 
@@ -124,3 +134,116 @@ export async function deleteUser(targetUserId: string, requestingUserId: string)
   await User.findByIdAndDelete(targetUserId);
   return { id: targetUserId };
 }
+
+function toPublicUser(user: UserType) {
+  return user.toJSON ? user.toJSON() : user;
+}
+
+export async function createAdmin(
+  input: {
+    name: string;
+    email?: string;
+    phone?: string;
+    password: string;
+  },
+  requestingUser?: UserType,
+) {
+  const existingAdminCount = await User.countDocuments({ userType: "admin" });
+
+  // If admins already exist, caller must be an authenticated admin
+  if (existingAdminCount > 0) {
+    if (!requestingUser || requestingUser.userType !== "admin") {
+      throw new UnauthorizedError("Only existing admins can create new admin accounts");
+    }
+  }
+
+  const identifierFilters: Record<string, string>[] = [];
+  if (input.email) {
+    identifierFilters.push({ email: input.email.toLowerCase() });
+  }
+  if (input.phone) {
+    identifierFilters.push({ phone: input.phone });
+  }
+
+  const existingUser = await User.findOne({ $or: identifierFilters });
+  if (existingUser) {
+    throw new ConflictError("Email or phone is already in use");
+  }
+
+  const admin = new User({
+    name: input.name,
+    email: input.email ? input.email.toLowerCase() : undefined,
+    phone: input.phone,
+    password: input.password,
+    userType: "admin",
+  });
+
+  await admin.save();
+  const token = await admin.generateAuthToken();
+
+  return {
+    user: toPublicUser(admin),
+    token,
+  };
+}
+
+export async function updateAdmin(
+  targetUserId: string,
+  input: {
+    name?: string;
+    email?: string;
+    phone?: string;
+  },
+) {
+  const user = await User.findById(targetUserId);
+  if (!user) {
+    throw new NotFoundError("User");
+  }
+
+  if (input.email && input.email.toLowerCase() !== user.email?.toLowerCase()) {
+    const existing = await User.findOne({
+      email: input.email.toLowerCase(),
+      _id: { $ne: targetUserId },
+    });
+    if (existing) {
+      throw new ConflictError("Email is already in use");
+    }
+    user.email = input.email.toLowerCase();
+  }
+
+  if (input.phone && input.phone !== user.phone) {
+    const existing = await User.findOne({
+      phone: input.phone,
+      _id: { $ne: targetUserId },
+    });
+    if (existing) {
+      throw new ConflictError("Phone number is already in use");
+    }
+    user.phone = input.phone;
+  }
+
+  if (input.name) {
+    user.name = input.name;
+  }
+
+  await user.save();
+  return { user: toPublicUser(user) };
+}
+
+export async function resetUserPassword(targetUserId: string, newPassword: string) {
+  const user = await User.findById(targetUserId);
+  if (!user) {
+    throw new NotFoundError("User");
+  }
+
+  user.password = newPassword;
+  // Invalidate previous tokens upon password reset
+  user.tokens = [];
+  await user.save();
+
+  return {
+    message: "Password reset successfully. Please log in with the new password.",
+    userId: targetUserId,
+  };
+}
+

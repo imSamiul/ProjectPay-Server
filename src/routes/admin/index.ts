@@ -1,12 +1,23 @@
 import { Router } from "express";
-import { auth } from "../../middleware/auth";
+import { auth, optionalAuth } from "../../middleware/auth";
 import { requireRole } from "../../middleware/require-role";
 import { validateRequest } from "../../middleware/validate-request";
-import { deleteUserHandler, getProjects, getStats, getUsers } from "./controller";
+import {
+  createAdminHandler,
+  deleteUserHandler,
+  getProjects,
+  getStats,
+  getUsers,
+  resetPasswordHandler,
+  updateAdminHandler,
+} from "./controller";
 import {
   adminProjectsQuerySchema,
   adminUsersQuerySchema,
+  createAdminSchema,
   deleteUserParamsSchema,
+  resetPasswordSchema,
+  updateAdminSchema,
 } from "./validators";
 
 const router = Router();
@@ -32,4 +43,29 @@ router.delete(
   deleteUserHandler,
 );
 
+// Admin creation: allows initial bootstrap if no admin exists, otherwise requires existing admin
+router.post(
+  "/admin/create",
+  optionalAuth,
+  validateRequest(createAdminSchema),
+  createAdminHandler,
+);
+
+// Admin edit/update profile
+router.patch(
+  "/admin/users/:userId",
+  ...adminOnly,
+  validateRequest(updateAdminSchema),
+  updateAdminHandler,
+);
+
+// Admin reset password for any user/admin
+router.post(
+  "/admin/users/:userId/reset-password",
+  ...adminOnly,
+  validateRequest(resetPasswordSchema),
+  resetPasswordHandler,
+);
+
 export default router;
+

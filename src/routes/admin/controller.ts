@@ -60,3 +60,49 @@ export async function deleteUserHandler(
     next(error);
   }
 }
+
+export async function createAdminHandler(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> {
+  try {
+    const result = await adminService.createAdmin(req.body, req.user);
+    res.status(201).send(result);
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function updateAdminHandler(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> {
+  try {
+    const result = await adminService.updateAdmin(
+      req.params.userId,
+      req.body,
+    );
+    res.status(200).send(result);
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function resetPasswordHandler(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> {
+  try {
+    const result = await adminService.resetUserPassword(
+      req.params.userId,
+      req.body.newPassword,
+    );
+    res.status(200).send(result);
+  } catch (error) {
+    next(error);
+  }
+}
+

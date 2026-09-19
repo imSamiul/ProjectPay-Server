@@ -1,0 +1,46 @@
+meta {
+  name: Update admin
+  type: http
+  seq: 5
+}
+
+patch {
+  url: {{baseUrl}}/admin/users/{{userId}}
+  body: json
+  auth: inherit
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "name": "Updated Admin Name",
+    "phone": "+8801700000001"
+  }
+}
+
+docs {
+  # PATCH /api/v1/admin/users/:userId
+
+  Updates an admin or user's profile details (`name`, `email`, `phone`).
+  Requires `userType: "admin"`.
+
+  ## Example response `200`
+  ```json
+  {
+    "user": {
+      "_id": "66f0...",
+      "name": "Updated Admin Name",
+      "email": "admin@test.com",
+      "phone": "+8801700000001",
+      "userType": "admin"
+    }
+  }
+  ```
+}
+
+assert {
+  res.status: eq 200
+}

@@ -49,3 +49,44 @@ export async function auth(
     next(new UnauthorizedError("Not authorized to access this resource"));
   }
 }
+
+export async function optionalAuth(
+  req: Request,
+  _res: Response,
+  next: NextFunction,
+): Promise<void> {
+  try {
+    const authHeader = req.header("Authorization");
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      next();
+      return;
+    }
+
+    const token = authHeader.replace("Bearer ", "").trim();
+    if (!token) {
+      next();
+      return;
+    }
+
+    const jwtSecret = process.env.JWT_TOKEN;
+    if (!jwtSecret) {
+      next();
+      return;
+    }
+
+    const { id } = jwt.verify(token, jwtSecret) as JwtPayload;
+    const user = await User.findOne({ _id: id, "tokens.token": token }).select(
+      "-password",
+    );
+
+    if (user) {
+      req.token = token;
+      req.user = user;
+    }
+    next();
+  } catch {
+    // For optional auth, ignore token errors and continue as unauthenticated
+    next();
+  }
+}
+
