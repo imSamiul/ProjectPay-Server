@@ -1,10 +1,10 @@
 import { Document, HydratedDocument, Model } from "mongoose";
 
 export type UserType = Document & {
-  name: string;
-  email: string;
+  name?: string;
+  email?: string;
   password: string;
-  phone: string;
+  phone?: string;
   tokens: { token: string }[];
   userType: "client" | "project manager" | "admin";
   createdAt: Date;
@@ -18,7 +18,7 @@ export type UserMethodsType = UserType & {
 
 export type UserModelType = Model<UserType, object, UserMethodsType> & {
   findByCredentials(
-    email: string,
+    identifier: string,
     password: string
   ): Promise<HydratedDocument<UserType & UserMethodsType>>;
 };

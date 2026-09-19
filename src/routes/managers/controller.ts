@@ -1,6 +1,5 @@
 import { Request, Response, NextFunction } from "express";
 import * as projectsService from "../../services/projects-service";
-import * as usersService from "../../services/users-service";
 
 export async function getManagerProjects(
   req: Request,
@@ -34,32 +33,18 @@ export async function getManagerStats(
   }
 }
 
-export async function createClient(
-  req: Request,
-  res: Response,
-  next: NextFunction,
-): Promise<void> {
-  try {
-    const client = await usersService.createManagerClient(
-      String(req.user!._id),
-      req.body,
-    );
-    res.status(201).send({ client });
-  } catch (error) {
-    next(error);
-  }
-}
-
 export async function listClients(
   req: Request,
   res: Response,
   next: NextFunction,
 ): Promise<void> {
   try {
-    const result = await usersService.listManagerClients(
+    const pageParam = Number(req.query.pageParam ?? 1);
+    const limit = Number(req.query.limit ?? 10);
+    const result = await projectsService.listManagerClients(
       String(req.user!._id),
-      Number(req.query.pageParam ?? 1),
-      Number(req.query.limit ?? 10),
+      pageParam,
+      limit,
     );
     res.status(200).send(result);
   } catch (error) {

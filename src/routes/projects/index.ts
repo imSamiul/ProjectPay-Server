@@ -6,21 +6,31 @@ import {
   createNewProject,
   deleteProject,
   getProjectDetails,
+  linkClient,
+  listMyProjects,
   searchProject,
+  unlinkClient,
   updateProjectDetails,
   updateProjectStatus,
 } from "./controller";
 import {
   createProjectSchema,
+  linkClientSchema,
   projectCodeParamsSchema,
   projectIdParamsSchema,
   searchProjectSchema,
+  unlinkClientSchema,
   updateProjectDetailsSchema,
   updateProjectStatusSchema,
 } from "./validators";
 
 const router = Router();
 const managerOnly = [auth, requireRole("project manager")] as const;
+const clientOnly = [auth, requireRole("client")] as const;
+const managerOrClient = [
+  auth,
+  requireRole("project manager", "client"),
+] as const;
 
 router.get(
   "/projects/search",
@@ -28,9 +38,10 @@ router.get(
   validateRequest(searchProjectSchema),
   searchProject,
 );
+router.get("/projects/mine", ...clientOnly, listMyProjects);
 router.get(
   "/projects/details/:projectCode",
-  ...managerOnly,
+  ...managerOrClient,
   validateRequest(projectCodeParamsSchema),
   getProjectDetails,
 );
@@ -57,6 +68,18 @@ router.delete(
   ...managerOnly,
   validateRequest(projectIdParamsSchema),
   deleteProject,
+);
+router.post(
+  "/projects/:projectCode/clients",
+  ...managerOnly,
+  validateRequest(linkClientSchema),
+  linkClient,
+);
+router.delete(
+  "/projects/:projectCode/clients/:clientId",
+  ...managerOnly,
+  validateRequest(unlinkClientSchema),
+  unlinkClient,
 );
 
 export default router;

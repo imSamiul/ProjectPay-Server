@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import Project from "../models/project-model";
 import ProjectManager from "../models/manager-model";
 import Payment from "../models/payment-model";
+import Client from "../models/client-model";
 import { ProjectType } from "../types/project-document-type";
 import { generateUUID, escapeRegex } from "../utils/uuid-generator";
 import {
@@ -15,11 +16,6 @@ const ALLOWED_UPDATES: (keyof ProjectType)[] = [
   "name",
   "budget",
   "advance",
-  "clientName",
-  "clientPhone",
-  "clientEmail",
-  "clientAddress",
-  "clientDetails",
   "endDate",
   "demoLink",
   "typeOfWeb",
@@ -63,6 +59,7 @@ export async function searchProjects(
 
   const [projects, total] = await Promise.all([
     Project.find(filter)
+      .populate({ path: "clients", select: "name email phone clientKey" })
       .sort({ createdAt: -1 })
       .skip((page - 1) * cappedLimit)
       .limit(cappedLimit)
@@ -83,15 +80,24 @@ export async function searchProjects(
 
 export async function getProjectDetails(
   projectCode: string,
-  managerId: string,
+  userId: string,
+  userType: "project manager" | "client",
 ) {
-  const project = await Project.findOne({
-    projectCode,
-    projectManager: managerId,
-  })
+  const filter: Record<string, unknown> = { projectCode };
+  if (userType === "client") {
+    filter.clients = userId;
+  } else {
+    filter.projectManager = userId;
+  }
+
+  const project = await Project.findOne(filter)
     .populate({
       path: "projectManager",
-      select: "name email",
+      select: "name email phone",
+    })
+    .populate({
+      path: "clients",
+      select: "name email phone clientKey",
     })
     .populate({
       path: "paymentList",
@@ -104,6 +110,150 @@ export async function getProjectDetails(
   }
 
   return project;
+}
+
+export async function linkClientToProject(
+  projectCode: string,
+  managerId: string,
+  clientKey: string,
+) {
+  const project = await Project.findOne({ projectCode });
+  if (!project) {
+    throw new NotFoundError("Project");
+  }
+  assertOwnership(project.projectManager, managerId);
+
+  const client = await Client.findOne({ clientKey });
+  if (!client) {
+    throw new NotFoundError("Client");
+  }
+
+  const alreadyLinked = project.clients.some(
+    (id) => String(id) === String(client._id),
+  );
+  if (alreadyLinked) {
+    throw new ConflictError("Client is already linked to this project");
+  }
+
+  project.clients.push(client._id as mongoose.Types.ObjectId);
+  await project.save();
+
+  await Client.findByIdAndUpdate(client._id, {
+    $addToSet: { projects: project._id },
+  });
+
+  return getProjectDetails(projectCode, managerId, "project manager");
+}
+
+export async function unlinkClientFromProject(
+  projectCode: string,
+  managerId: string,
+  clientId: string,
+) {
+  const project = await Project.findOne({ projectCode });
+  if (!project) {
+    throw new NotFoundError("Project");
+  }
+  assertOwnership(project.projectManager, managerId);
+
+  project.clients = project.clients.filter(
+    (id) => String(id) !== String(clientId),
+  ) as mongoose.Types.ObjectId[];
+  await project.save();
+
+  await Client.findByIdAndUpdate(clientId, {
+    $pull: { projects: project._id },
+  });
+
+  return getProjectDetails(projectCode, managerId, "project manager");
+}
+
+export async function listMyProjects(clientId: string) {
+  const projects = await Project.find({ clients: clientId })
+    .select(
+      "projectCode name budget advance due totalPaid startDate endDate status clients createdAt",
+    )
+    .populate({ path: "clients", select: "name email phone clientKey" })
+    .sort({ createdAt: -1 })
+    .lean();
+
+  return projects;
+}
+
+export async function listManagerClients(
+  managerId: string,
+  pageParam: number,
+  limit: number,
+) {
+  const cappedLimit = Math.min(Math.max(limit, 1), 50);
+  const page = Math.max(pageParam, 1);
+
+  const projects = await Project.find({ projectManager: managerId })
+    .select("projectCode name status budget due clients")
+    .lean();
+
+  type ClientProjectRow = {
+    clientId: string;
+    projectId: string;
+    projectCode: string;
+    projectName: string;
+    budget: number;
+    due: number;
+    status: boolean;
+  };
+
+  const rows: ClientProjectRow[] = [];
+  for (const project of projects) {
+    for (const clientId of project.clients ?? []) {
+      rows.push({
+        clientId: String(clientId),
+        projectId: String(project._id),
+        projectCode: project.projectCode,
+        projectName: project.name,
+        budget: project.budget,
+        due: project.due,
+        status: project.status,
+      });
+    }
+  }
+
+  const clientIds = Array.from(new Set(rows.map((row) => row.clientId)));
+
+  const clientDocs = await Client.find({ _id: { $in: clientIds } })
+    .select("name email phone clientKey")
+    .lean();
+  const clientById = new Map(
+    clientDocs.map((client) => [String(client._id), client]),
+  );
+
+  const enrichedRows = rows
+    .map((row) => {
+      const client = clientById.get(row.clientId);
+      return {
+        ...row,
+        clientName: client?.name,
+        clientEmail: client?.email,
+        clientPhone: client?.phone,
+        clientKey: client?.clientKey,
+      };
+    })
+    .sort((a, b) => (a.clientName ?? "").localeCompare(b.clientName ?? ""));
+
+  const total = enrichedRows.length;
+  const pageRows = enrichedRows.slice(
+    (page - 1) * cappedLimit,
+    page * cappedLimit,
+  );
+
+  return {
+    clients: pageRows,
+    pagination: {
+      page,
+      limit: cappedLimit,
+      total,
+      totalPages: Math.ceil(total / cappedLimit) || 0,
+    },
+  };
 }
 
 export async function createProject(
@@ -222,6 +372,7 @@ export async function listManagerProjects(
 
   const [projects, total] = await Promise.all([
     Project.find(filter)
+      .populate({ path: "clients", select: "name email phone clientKey" })
       .sort({ createdAt: -1 })
       .skip((page - 1) * cappedLimit)
       .limit(cappedLimit)
@@ -244,7 +395,7 @@ export async function getManagerStats(managerId: string) {
   const today = new Date().toISOString().split("T")[0];
   const managerObjectId = new mongoose.Types.ObjectId(managerId);
 
-  const [projectTotals, manager] = await Promise.all([
+  const [projectTotals, clientCountResult] = await Promise.all([
     Project.aggregate([
       { $match: { projectManager: managerObjectId } },
       {
@@ -296,7 +447,12 @@ export async function getManagerStats(managerId: string) {
         },
       },
     ]),
-    ProjectManager.findById(managerId).select("clientList").lean(),
+    Project.aggregate([
+      { $match: { projectManager: managerObjectId } },
+      { $unwind: "$clients" },
+      { $group: { _id: "$clients" } },
+      { $count: "total" },
+    ]),
   ]);
 
   const totals = projectTotals[0] ?? {
@@ -320,7 +476,7 @@ export async function getManagerStats(managerId: string) {
       totalCollected: totals.totalCollected,
     },
     clients: {
-      total: manager?.clientList?.length ?? 0,
+      total: clientCountResult[0]?.total ?? 0,
     },
   };
 }

@@ -87,7 +87,7 @@ export async function listAllProjects(pageParam: number, limit: number) {
 
   const [projects, total] = await Promise.all([
     Project.find()
-      .select("projectCode name budget due totalPaid status clientName projectManager createdAt")
+      .select("projectCode name budget due totalPaid status projectManager createdAt")
       .populate("projectManager", "name email")
       .sort({ createdAt: -1 })
       .skip((page - 1) * cappedLimit)

@@ -15,17 +15,16 @@ const userSchema = new mongoose.Schema<
   {
     name: {
       type: String,
-      required: true,
       trim: true,
     },
     email: {
       type: String,
-      required: true,
       trim: true,
       unique: true,
+      sparse: true,
       lowercase: true,
       validate: (value: string) => {
-        if (!validator.isEmail(value)) {
+        if (value && !validator.isEmail(value)) {
           throw new Error("Email is invalid");
         }
       },
@@ -51,8 +50,9 @@ const userSchema = new mongoose.Schema<
     ],
     phone: {
       type: String,
-      required: true,
       trim: true,
+      unique: true,
+      sparse: true,
     },
   },
   {
@@ -60,6 +60,14 @@ const userSchema = new mongoose.Schema<
     timestamps: true,
   },
 );
+
+userSchema.pre("validate", function requireIdentifier(next) {
+  if (!this.email && !this.phone) {
+    next(new Error("Either email or phone is required"));
+    return;
+  }
+  next();
+});
 
 userSchema.pre("save", async function hashPassword(next) {
   if (this.isModified("password")) {
@@ -95,16 +103,18 @@ userSchema.methods.toJSON = function toJSON() {
 };
 
 userSchema.statics.findByCredentials = async function (
-  email: string,
+  identifier: string,
   password: string,
 ) {
-  const foundUser = await this.findOne({ email });
+  const foundUser = await this.findOne({
+    $or: [{ email: identifier.toLowerCase() }, { phone: identifier }],
+  });
   if (!foundUser) {
-    throw new Error("Email is incorrect");
+    throw new Error("Invalid credentials");
   }
   const isMatch = await bcrypt.compare(password, foundUser.password);
   if (!isMatch) {
-    throw new Error(" Password is incorrect");
+    throw new Error("Invalid credentials");
   }
   return foundUser;
 };

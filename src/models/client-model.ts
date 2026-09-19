@@ -1,9 +1,14 @@
 import mongoose from "mongoose";
-import { UserType, UserModelType } from "../types/user-type";
+import { ClientType, ClientModelType } from "../types/client-type";
 import User from "./user-model";
 
 const clientSchema = new mongoose.Schema(
   {
+    clientKey: {
+      type: String,
+      required: true,
+      unique: true,
+    },
     projects: [
       {
         type: mongoose.Schema.Types.ObjectId,
@@ -16,7 +21,7 @@ const clientSchema = new mongoose.Schema(
   },
 );
 
-const Client = User.discriminator<UserType, UserModelType>(
+const Client = User.discriminator<ClientType, ClientModelType>(
   "client",
   clientSchema,
 );

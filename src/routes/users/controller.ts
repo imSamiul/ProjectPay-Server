@@ -32,8 +32,8 @@ export async function loginUser(
   next: NextFunction,
 ): Promise<void> {
   try {
-    const { email, password } = req.body;
-    const result = await usersService.loginUser(email, password);
+    const { identifier, password } = req.body;
+    const result = await usersService.loginUser(identifier, password);
     res.status(201).send(result);
   } catch (error) {
     next(error);
@@ -48,6 +48,39 @@ export async function logOutUser(
   try {
     const message = await usersService.logoutUser(req.user!, req.token!);
     res.status(200).send(message);
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function updateUserProfile(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> {
+  try {
+    const result = await usersService.updateUserProfile(
+      String(req.user!._id),
+      req.body,
+    );
+    res.status(200).send(result);
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function changeUserPassword(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> {
+  try {
+    const message = await usersService.changeUserPassword(
+      String(req.user!._id),
+      req.body.currentPassword,
+      req.body.newPassword,
+    );
+    res.status(200).send({ message });
   } catch (error) {
     next(error);
   }

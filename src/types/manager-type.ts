@@ -4,7 +4,6 @@ import { UserType, UserMethodsType, UserModelType } from './user-type';
 // IManager === Type
 export type ManagerType = UserType & {
   managerProjects: mongoose.Types.ObjectId[];
-  clientList: mongoose.Types.ObjectId[];
 };
 
 export type ManagerMethodsType = UserMethodsType;

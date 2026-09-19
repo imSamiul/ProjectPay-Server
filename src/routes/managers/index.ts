@@ -2,14 +2,8 @@ import { Router } from "express";
 import { auth } from "../../middleware/auth";
 import { requireRole } from "../../middleware/require-role";
 import { validateRequest } from "../../middleware/validate-request";
+import { getManagerProjects, getManagerStats, listClients } from "./controller";
 import {
-  createClient,
-  getManagerProjects,
-  getManagerStats,
-  listClients,
-} from "./controller";
-import {
-  createClientSchema,
   managerClientsQuerySchema,
   managerProjectsQuerySchema,
 } from "./validators";
@@ -24,12 +18,11 @@ router.get(
   validateRequest(managerProjectsQuerySchema),
   getManagerProjects,
 );
-router.get("/manager/clients", ...managerOnly, validateRequest(managerClientsQuerySchema), listClients);
-router.post(
+router.get(
   "/manager/clients",
   ...managerOnly,
-  validateRequest(createClientSchema),
-  createClient,
+  validateRequest(managerClientsQuerySchema),
+  listClients,
 );
 
 export default router;

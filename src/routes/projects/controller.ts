@@ -28,8 +28,58 @@ export async function getProjectDetails(
     const project = await projectsService.getProjectDetails(
       req.params.projectCode,
       String(req.user!._id),
+      req.user!.userType === "client" ? "client" : "project manager",
     );
     res.status(200).send(project);
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function linkClient(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> {
+  try {
+    const project = await projectsService.linkClientToProject(
+      req.params.projectCode,
+      String(req.user!._id),
+      req.body.clientKey,
+    );
+    res.status(200).send(project);
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function unlinkClient(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> {
+  try {
+    const project = await projectsService.unlinkClientFromProject(
+      req.params.projectCode,
+      String(req.user!._id),
+      req.params.clientId,
+    );
+    res.status(200).send(project);
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function listMyProjects(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> {
+  try {
+    const projects = await projectsService.listMyProjects(
+      String(req.user!._id),
+    );
+    res.status(200).send(projects);
   } catch (error) {
     next(error);
   }

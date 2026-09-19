@@ -10,12 +10,6 @@ const managerSchema = new mongoose.Schema<ManagerType>(
         ref: "Project",
       },
     ],
-    clientList: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Client",
-      },
-    ],
   },
   {
     timestamps: true,

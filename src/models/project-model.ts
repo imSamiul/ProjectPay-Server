@@ -29,25 +29,6 @@ const projectSchema = new mongoose.Schema<ProjectType>(
       type: Number,
       default: 0,
     },
-    clientName: {
-      type: String,
-      required: true,
-      ref: "Client",
-    },
-    clientPhone: {
-      type: String,
-      required: true,
-    },
-    clientEmail: {
-      type: String,
-      required: true,
-    },
-    clientAddress: {
-      type: String,
-    },
-    clientDetails: {
-      type: String,
-    },
     startDate: {
       type: String,
       required: true,
@@ -71,10 +52,10 @@ const projectSchema = new mongoose.Schema<ProjectType>(
       required: true,
       default: false,
     },
-    verifiedClientList: [
+    clients: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Client",
+        ref: "client",
       },
     ],
     projectManager: {
